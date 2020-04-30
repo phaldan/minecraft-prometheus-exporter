@@ -1,7 +1,6 @@
 package de.sldk.mc.config;
 
 import de.sldk.mc.MetricRegistry;
-import de.sldk.mc.PrometheusExporter;
 import de.sldk.mc.metrics.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -34,10 +33,10 @@ public class PrometheusExporterConfig {
             metricConfig("player_online", false, PlayerOnline::new),
             metricConfig("player_statistic", false, PlayerStatistics::new));
 
-    private final PrometheusExporter prometheusExporter;
+    private final Plugin bukkitPlugin;
 
-    public PrometheusExporterConfig(PrometheusExporter prometheusExporter) {
-        this.prometheusExporter = prometheusExporter;
+    public PrometheusExporterConfig(Plugin bukkitPlugin) {
+        this.bukkitPlugin = bukkitPlugin;
     }
 
     private static MetricConfig metricConfig(String key, boolean defaultValue, Function<Plugin, Metric> metricInitializer) {
@@ -45,7 +44,7 @@ public class PrometheusExporterConfig {
     }
 
     public void loadDefaultsAndSave() {
-        FileConfiguration configFile = prometheusExporter.getConfig();
+        FileConfiguration configFile = bukkitPlugin.getConfig();
 
         PrometheusExporterConfig.HOST.setDefault(configFile);
         PrometheusExporterConfig.PORT.setDefault(configFile);
@@ -53,26 +52,26 @@ public class PrometheusExporterConfig {
 
         configFile.options().copyDefaults(true);
 
-        prometheusExporter.saveConfig();
+        bukkitPlugin.saveConfig();
     }
 
     public void enableConfiguredMetrics() {
         PrometheusExporterConfig.METRICS
                 .forEach(metricConfig -> {
-                    Metric metric = metricConfig.getMetric(prometheusExporter);
+                    Metric metric = metricConfig.getMetric(bukkitPlugin);
                     Boolean enabled = get(metricConfig);
 
                     if (Boolean.TRUE.equals(enabled)) {
                         metric.enable();
                     }
 
-                    prometheusExporter.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
+                    bukkitPlugin.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
 
                     MetricRegistry.getInstance().register(metric);
                 });
     }
 
     public <T> T get(PluginConfig<T> config) {
-        return config.get(prometheusExporter.getConfig());
+        return config.get(bukkitPlugin.getConfig());
     }
 }
