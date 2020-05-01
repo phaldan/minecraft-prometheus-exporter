@@ -13,7 +13,13 @@ public class PrometheusExporterConfig {
 
     public static final PluginConfig<String> HOST = new PluginConfig<>("host", "localhost");
     public static final PluginConfig<Integer> PORT = new PluginConfig<>("port", 9225);
-    private static final List<MetricConfig> METRICS = Arrays.asList(
+    private final List<MetricConfig> metrics;
+
+    private final Plugin bukkitPlugin;
+
+    public PrometheusExporterConfig(Plugin bukkitPlugin) {
+        this.bukkitPlugin = bukkitPlugin;
+        metrics = Arrays.asList(
             metricConfig("entities_total", true, Entities::new),
             metricConfig("villagers_total", true, Villagers::new),
             metricConfig("loaded_chunks_total", true, LoadedChunks::new),
@@ -32,15 +38,10 @@ public class PrometheusExporterConfig {
 
             metricConfig("player_online", false, PlayerOnline::new),
             metricConfig("player_statistic", false, PlayerStatistics::new));
-
-    private final Plugin bukkitPlugin;
-
-    public PrometheusExporterConfig(Plugin bukkitPlugin) {
-        this.bukkitPlugin = bukkitPlugin;
     }
 
-    private static MetricConfig metricConfig(String key, boolean defaultValue, Function<Plugin, Metric> metricInitializer) {
-        return new MetricConfig(key, defaultValue, metricInitializer);
+    private MetricConfig metricConfig(String key, boolean defaultValue, Function<Plugin, Metric> metricInitializer) {
+        return new MetricConfig(key, defaultValue, metricInitializer.apply(bukkitPlugin));
     }
 
     public void loadDefaultsAndSave() {
@@ -48,7 +49,7 @@ public class PrometheusExporterConfig {
 
         PrometheusExporterConfig.HOST.setDefault(configFile);
         PrometheusExporterConfig.PORT.setDefault(configFile);
-        METRICS.forEach(metric -> metric.setDefault(configFile));
+        metrics.forEach(metric -> metric.setDefault(configFile));
 
         configFile.options().copyDefaults(true);
 
@@ -56,19 +57,18 @@ public class PrometheusExporterConfig {
     }
 
     public void enableConfiguredMetrics() {
-        METRICS
-                .forEach(metricConfig -> {
-                    Metric metric = metricConfig.getMetric(bukkitPlugin);
-                    Boolean enabled = get(metricConfig);
+        metrics.forEach(metricConfig -> {
+            Metric metric = metricConfig.getMetric();
+            Boolean enabled = get(metricConfig);
 
-                    if (Boolean.TRUE.equals(enabled)) {
-                        metric.enable();
-                    }
+            if (Boolean.TRUE.equals(enabled)) {
+                metric.enable();
+            }
 
-                    bukkitPlugin.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
+            bukkitPlugin.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
 
-                    MetricRegistry.getInstance().register(metric);
-                });
+            MetricRegistry.getInstance().register(metric);
+        });
     }
 
     public <T> T get(PluginConfig<T> config) {

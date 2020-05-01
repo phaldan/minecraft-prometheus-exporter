@@ -9,14 +9,14 @@ public class MetricConfig extends PluginConfig<Boolean> {
 
     private static final String CONFIG_PATH_PREFIX = "enable_metrics";
 
-    private Function<Plugin, Metric> metricInitializer;
+    private final Metric metric;
 
-    protected MetricConfig(String key, Boolean defaultValue, Function<Plugin, Metric> metricInitializer) {
+    protected MetricConfig(String key, Boolean defaultValue, Metric metric) {
         super(CONFIG_PATH_PREFIX + "." + key, defaultValue);
-        this.metricInitializer = metricInitializer;
+        this.metric = metric;
     }
 
-    public Metric getMetric(Plugin plugin) {
-        return metricInitializer.apply(plugin);
+    public Metric getMetric() {
+        return metric;
     }
 }
