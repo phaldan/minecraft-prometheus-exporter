@@ -22,15 +22,15 @@ class VillagersTest {
 	private static final String VILLAGERS_METRIC_NAME = "mc_villagers_total";
 	private static final String[] METRIC_LABELS = new String[] {"world", "type", "profession", "level"};
 
-	private static final CollectorRegistry REGISTRY = CollectorRegistry.defaultRegistry;
+	private CollectorRegistry registry;
 	private Villagers villagersMetric;
 	private World world;
 
 	@BeforeEach
 	void beforeEachTest() {
-		REGISTRY.clear();
 		Plugin plugin = mock(Plugin.class);
-		villagersMetric = new Villagers(plugin);
+		registry = new CollectorRegistry();
+		villagersMetric = new Villagers(plugin, registry);
 		villagersMetric.enable();
 		world = mock(World.class);
 	}
@@ -50,10 +50,10 @@ class VillagersTest {
 		when(world.getEntitiesByClass(Villager.class)).thenReturn(mockedVillagers);
 		villagersMetric.collect(world);
 
-		assertThat(REGISTRY.getSampleValue(VILLAGERS_METRIC_NAME, METRIC_LABELS,
+		assertThat(registry.getSampleValue(VILLAGERS_METRIC_NAME, METRIC_LABELS,
 				new String[] {worldName, "desert", "farmer", "1"})).isEqualTo(numOfDesertFarmersLevel1);
 
-		assertThat(REGISTRY.getSampleValue(VILLAGERS_METRIC_NAME, METRIC_LABELS,
+		assertThat(registry.getSampleValue(VILLAGERS_METRIC_NAME, METRIC_LABELS,
 				new String[] {worldName, "plains", "none", "2"})).isEqualTo(numOfPlainsNoneLevel2);
 	}
 

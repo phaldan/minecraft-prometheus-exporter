@@ -12,12 +12,14 @@ public abstract class Metric {
 
     private final Plugin plugin;
     private final Collector collector;
+    private final CollectorRegistry registry;
 
     private boolean enabled = false;
 
-    protected Metric(Plugin plugin, Collector collector) {
+    protected Metric(Plugin plugin, Collector collector, CollectorRegistry registry) {
         this.plugin = plugin;
         this.collector = collector;
+        this.registry = registry;
     }
 
     protected Plugin getPlugin() {
@@ -53,12 +55,12 @@ public abstract class Metric {
     }
 
     public void enable() {
-        CollectorRegistry.defaultRegistry.register(collector);
+        registry.register(collector);
         enabled = true;
     }
 
     public void disable() {
-        CollectorRegistry.defaultRegistry.unregister(collector);
+        registry.unregister(collector);
         enabled = false;
     }
 

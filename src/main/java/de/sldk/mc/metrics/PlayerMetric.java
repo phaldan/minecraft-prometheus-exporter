@@ -1,14 +1,15 @@
 package de.sldk.mc.metrics;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CollectorRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
 public abstract class PlayerMetric extends Metric {
 
-    public PlayerMetric(Plugin plugin, Collector collector) {
-        super(plugin, collector);
+    public PlayerMetric(Plugin plugin, Collector collector, CollectorRegistry registry) {
+        super(plugin, collector, registry);
     }
 
     @Override

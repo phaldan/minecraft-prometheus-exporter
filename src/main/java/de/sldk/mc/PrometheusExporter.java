@@ -1,6 +1,7 @@
 package de.sldk.mc;
 
 import de.sldk.mc.config.PrometheusExporterConfig;
+import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
@@ -10,7 +11,9 @@ import java.util.logging.Level;
 
 public class PrometheusExporter extends JavaPlugin {
 
-    private final PrometheusExporterConfig config = new PrometheusExporterConfig(this);
+    private final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
+    private final PrometheusExporterConfig config = new PrometheusExporterConfig(this, registry);
+    private final MetricsController controller = new MetricsController(this, registry);
     private Server server;
 
     @Override
@@ -28,7 +31,7 @@ public class PrometheusExporter extends JavaPlugin {
         String host = config.get(PrometheusExporterConfig.HOST);
 
         GzipHandler gzipHandler = new GzipHandler();
-        gzipHandler.setHandler(new MetricsController(this));
+        gzipHandler.setHandler(controller);
 
         InetSocketAddress address = new InetSocketAddress(host, port);
         server = new Server(address);

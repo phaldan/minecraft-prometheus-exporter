@@ -1,5 +1,6 @@
 package de.sldk.mc.metrics;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -35,8 +36,8 @@ public class Entities extends WorldMetric {
      */
     private static final Map<EntityType, Boolean> ALIVE_OVERRIDE = singletonMap(EntityType.ARMOR_STAND, false);
 
-    public Entities(Plugin plugin) {
-        super(plugin, ENTITIES);
+    public Entities(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, ENTITIES, registry);
     }
 
     @Override

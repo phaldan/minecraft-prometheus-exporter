@@ -2,12 +2,12 @@ package de.sldk.mc.config;
 
 import de.sldk.mc.MetricRegistry;
 import de.sldk.mc.metrics.*;
+import io.prometheus.client.CollectorRegistry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 public class PrometheusExporterConfig {
 
@@ -17,31 +17,31 @@ public class PrometheusExporterConfig {
 
     private final Plugin bukkitPlugin;
 
-    public PrometheusExporterConfig(Plugin bukkitPlugin) {
+    public PrometheusExporterConfig(Plugin bukkitPlugin, CollectorRegistry registry) {
         this.bukkitPlugin = bukkitPlugin;
         metrics = Arrays.asList(
-            metricConfig("entities_total", true, Entities::new),
-            metricConfig("villagers_total", true, Villagers::new),
-            metricConfig("loaded_chunks_total", true, LoadedChunks::new),
-            metricConfig("jvm_memory", true, Memory::new),
-            metricConfig("players_online_total", true, PlayersOnlineTotal::new),
-            metricConfig("players_total", true, PlayersTotal::new),
-            metricConfig("tps", true, Tps::new),
+            metricConfig("entities_total", true, new Entities(bukkitPlugin, registry)),
+            metricConfig("villagers_total", true, new Villagers(bukkitPlugin, registry)),
+            metricConfig("loaded_chunks_total", true, new LoadedChunks(bukkitPlugin, registry)),
+            metricConfig("jvm_memory", true, new Memory(bukkitPlugin, registry)),
+            metricConfig("players_online_total", true, new PlayersOnlineTotal(bukkitPlugin, registry)),
+            metricConfig("players_total", true, new PlayersTotal(bukkitPlugin, registry)),
+            metricConfig("tps", true, new Tps(bukkitPlugin, registry)),
 
-            metricConfig("jvm_threads", true, ThreadsWrapper::new),
-            metricConfig("jvm_gc", true, GarbageCollectorWrapper::new),
+            metricConfig("jvm_threads", true, new ThreadsWrapper(bukkitPlugin, registry)),
+            metricConfig("jvm_gc", true, new GarbageCollectorWrapper(bukkitPlugin, registry)),
 
-            metricConfig("tick_duration_median", true, TickDurationMedianCollector::new),
-            metricConfig("tick_duration_average", true, TickDurationAverageCollector::new),
-            metricConfig("tick_duration_min", false, TickDurationMinCollector::new),
-            metricConfig("tick_duration_max", true, TickDurationMaxCollector::new),
+            metricConfig("tick_duration_median", true, new TickDurationMedianCollector(bukkitPlugin, registry)),
+            metricConfig("tick_duration_average", true, new TickDurationAverageCollector(bukkitPlugin, registry)),
+            metricConfig("tick_duration_min", false, new TickDurationMinCollector(bukkitPlugin, registry)),
+            metricConfig("tick_duration_max", true, new TickDurationMaxCollector(bukkitPlugin, registry)),
 
-            metricConfig("player_online", false, PlayerOnline::new),
-            metricConfig("player_statistic", false, PlayerStatistics::new));
+            metricConfig("player_online", false, new PlayerOnline(bukkitPlugin, registry)),
+            metricConfig("player_statistic", false, new PlayerStatistics(bukkitPlugin, registry)));
     }
 
-    private MetricConfig metricConfig(String key, boolean defaultValue, Function<Plugin, Metric> metricInitializer) {
-        return new MetricConfig(key, defaultValue, metricInitializer.apply(bukkitPlugin));
+    private MetricConfig metricConfig(String key, boolean defaultValue, Metric metric) {
+        return new MetricConfig(key, defaultValue, metric);
     }
 
     public void loadDefaultsAndSave() {

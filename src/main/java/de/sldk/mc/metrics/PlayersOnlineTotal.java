@@ -1,5 +1,6 @@
 package de.sldk.mc.metrics;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
@@ -12,8 +13,8 @@ public class PlayersOnlineTotal extends WorldMetric {
             .labelNames("world")
             .create();
 
-    public PlayersOnlineTotal(Plugin plugin) {
-        super(plugin, PLAYERS_ONLINE);
+    public PlayersOnlineTotal(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, PLAYERS_ONLINE, registry);
     }
 
     @Override

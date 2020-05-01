@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 
+import io.prometheus.client.CollectorRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
@@ -17,8 +18,8 @@ public abstract class TickDurationCollector extends Metric {
      */
     private static long[] tickDurationReference = null;
 
-    public TickDurationCollector(Plugin plugin, Gauge gauge, String name) {
-        super(plugin, gauge);
+    public TickDurationCollector(Plugin plugin, Gauge gauge, CollectorRegistry registry) {
+        super(plugin, gauge, registry);
 
         /*
          * If there is not yet a handle to the internal tick duration buffer, try

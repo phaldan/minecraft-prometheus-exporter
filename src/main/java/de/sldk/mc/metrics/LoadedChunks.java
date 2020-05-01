@@ -1,5 +1,6 @@
 package de.sldk.mc.metrics;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.World;
 import org.bukkit.plugin.Plugin;
@@ -12,8 +13,8 @@ public class LoadedChunks extends WorldMetric {
             .labelNames("world")
             .create();
 
-    public LoadedChunks(Plugin plugin) {
-        super(plugin, LOADED_CHUNKS);
+    public LoadedChunks(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, LOADED_CHUNKS, registry);
     }
 
     @Override

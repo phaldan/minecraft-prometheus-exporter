@@ -1,6 +1,7 @@
 package de.sldk.mc.metrics;
 
 import de.sldk.mc.tps.TpsCollector;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -14,10 +15,10 @@ public class Tps extends Metric {
 
     private int taskId;
 
-    private TpsCollector tpsCollector = new TpsCollector();
+    private final TpsCollector tpsCollector = new TpsCollector();
 
-    public Tps(Plugin plugin) {
-        super(plugin, TPS);
+    public Tps(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, TPS, registry);
     }
 
     @Override

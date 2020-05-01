@@ -16,9 +16,11 @@ public class MetricsController extends AbstractHandler {
 
     private final MetricRegistry metricRegistry = MetricRegistry.getInstance();
     private final PrometheusExporter exporter;
+    private final CollectorRegistry registry;
 
-    public MetricsController(PrometheusExporter exporter) {
+    public MetricsController(PrometheusExporter exporter, CollectorRegistry registry) {
         this.exporter = exporter;
+        this.registry = registry;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class MetricsController extends AbstractHandler {
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(TextFormat.CONTENT_TYPE_004);
 
-            TextFormat.write004(response.getWriter(), CollectorRegistry.defaultRegistry.metricFamilySamples());
+            TextFormat.write004(response.getWriter(), registry.metricFamilySamples());
 
             baseRequest.setHandled(true);
         } catch (InterruptedException | ExecutionException e) {

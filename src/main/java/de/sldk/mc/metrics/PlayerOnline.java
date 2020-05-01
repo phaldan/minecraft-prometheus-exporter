@@ -1,5 +1,6 @@
 package de.sldk.mc.metrics;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
@@ -12,8 +13,8 @@ public class PlayerOnline extends PlayerMetric {
             .labelNames("name", "uid")
             .create();
 
-    public PlayerOnline(Plugin plugin) {
-        super(plugin, PLAYERS_WITH_NAMES);
+    public PlayerOnline(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, PLAYERS_WITH_NAMES, registry);
     }
 
     @Override

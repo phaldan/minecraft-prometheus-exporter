@@ -1,5 +1,6 @@
 package de.sldk.mc.metrics;
 
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 import org.bukkit.World;
 import org.bukkit.entity.Villager;
@@ -28,8 +29,8 @@ public class Villagers extends WorldMetric {
             .labelNames("world", "type", "profession", "level")
             .create();
 
-    public Villagers(Plugin plugin) {
-        super(plugin, VILLAGERS);
+    public Villagers(Plugin plugin, CollectorRegistry registry) {
+        super(plugin, VILLAGERS, registry);
     }
 
     @Override
