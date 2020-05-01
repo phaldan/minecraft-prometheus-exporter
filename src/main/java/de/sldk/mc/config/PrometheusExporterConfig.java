@@ -13,7 +13,7 @@ public class PrometheusExporterConfig {
 
     public static final PluginConfig<String> HOST = new PluginConfig<>("host", "localhost");
     public static final PluginConfig<Integer> PORT = new PluginConfig<>("port", 9225);
-    public static final List<MetricConfig> METRICS = Arrays.asList(
+    private static final List<MetricConfig> METRICS = Arrays.asList(
             metricConfig("entities_total", true, Entities::new),
             metricConfig("villagers_total", true, Villagers::new),
             metricConfig("loaded_chunks_total", true, LoadedChunks::new),
@@ -48,7 +48,7 @@ public class PrometheusExporterConfig {
 
         PrometheusExporterConfig.HOST.setDefault(configFile);
         PrometheusExporterConfig.PORT.setDefault(configFile);
-        PrometheusExporterConfig.METRICS.forEach(metric -> metric.setDefault(configFile));
+        METRICS.forEach(metric -> metric.setDefault(configFile));
 
         configFile.options().copyDefaults(true);
 
@@ -56,7 +56,7 @@ public class PrometheusExporterConfig {
     }
 
     public void enableConfiguredMetrics() {
-        PrometheusExporterConfig.METRICS
+        METRICS
                 .forEach(metricConfig -> {
                     Metric metric = metricConfig.getMetric(bukkitPlugin);
                     Boolean enabled = get(metricConfig);
