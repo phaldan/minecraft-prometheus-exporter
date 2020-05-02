@@ -11,9 +11,14 @@ import java.util.logging.Level;
 
 public class PrometheusExporter extends JavaPlugin {
 
-    private final CollectorRegistry registry = CollectorRegistry.defaultRegistry;
+    private final CoreModule coreModule = new CoreModule();
+
+    private final CollectorRegistry registry = coreModule.collectorRegistry();
+
     private final PrometheusExporterConfig config = new PrometheusExporterConfig(this, registry);
-    private final MetricsController controller = new MetricsController(this, registry);
+
+    private final MetricsController controller = coreModule.metricsController(this, registry);
+
     private Server server;
 
     @Override

@@ -2,6 +2,7 @@ package de.sldk.mc;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
+import org.bukkit.plugin.Plugin;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -15,10 +16,10 @@ import java.util.logging.Level;
 public class MetricsController extends AbstractHandler {
 
     private final MetricRegistry metricRegistry = MetricRegistry.getInstance();
-    private final PrometheusExporter exporter;
+    private final Plugin exporter;
     private final CollectorRegistry registry;
 
-    public MetricsController(PrometheusExporter exporter, CollectorRegistry registry) {
+    public MetricsController(Plugin exporter, CollectorRegistry registry) {
         this.exporter = exporter;
         this.registry = registry;
     }
