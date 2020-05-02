@@ -11,8 +11,8 @@ public class MetricConfig extends PluginConfig<Boolean> {
 
     private final Metric metric;
 
-    protected MetricConfig(String key, Boolean defaultValue, Metric metric) {
-        super(CONFIG_PATH_PREFIX + "." + key, defaultValue);
+    protected MetricConfig(String key, Metric metric) {
+        super(CONFIG_PATH_PREFIX + "." + key);
         this.metric = metric;
     }
 
