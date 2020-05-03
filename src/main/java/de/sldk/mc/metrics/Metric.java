@@ -8,14 +8,16 @@ public abstract class Metric {
     private final static String COMMON_PREFIX = "mc_";
 
     private final Collector collector;
-    private final CollectorRegistry registry;
 
     protected Metric(Collector collector, CollectorRegistry registry) {
         this.collector = collector;
-        this.registry = registry;
     }
 
     public void doCollect() {
+    }
+
+    public Collector getCollector() {
+        return collector;
     }
 
     protected static String prefix(String name) {
@@ -23,10 +25,8 @@ public abstract class Metric {
     }
 
     public void enable() {
-        registry.register(collector);
     }
 
     public void disable() {
-        registry.unregister(collector);
     }
 }

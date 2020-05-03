@@ -41,8 +41,9 @@ class EntitiesTest {
 
 	@BeforeEach
 	void beforeEachTest(@Mock MinecraftApi server) {
-		registry = new CollectorRegistry();
 		entitiesMetric = new Entities(registry, server);
+		registry = new CollectorRegistry();
+		registry.register(entitiesMetric.getCollector());
 		entitiesMetric.enable();
 	}
 

@@ -42,8 +42,9 @@ class VillagersTest {
 
 	@BeforeEach
 	void beforeEachTest(@Mock MinecraftApi server) {
-		registry = new CollectorRegistry();
 		villagersMetric = new Villagers(registry, server);
+		registry = new CollectorRegistry();
+		registry.register(villagersMetric.getCollector());
 		villagersMetric.enable();
 	}
 

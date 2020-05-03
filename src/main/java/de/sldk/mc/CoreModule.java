@@ -18,8 +18,11 @@ public class CoreModule {
         return new MetricsController(bukkitPlugin, registry, metricRegistry);
     }
 
-    MetricService metricService(PrometheusExporterConfig config, MetricRegistry metricRegistry) {
-        return new MetricService(config, metricRegistry);
+    MetricService metricService(
+            PrometheusExporterConfig config,
+            MetricRegistry metricRegistry,
+            CollectorRegistry collectorRegistry) {
+        return new MetricService(config, metricRegistry, collectorRegistry);
     }
 
     PrometheusExporterConfig prometheusExporterConfig(MinecraftApi server, Map<String, Metric> metrics) {
