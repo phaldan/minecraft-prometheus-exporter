@@ -12,9 +12,6 @@ public class ThreadsWrapper extends Metric {
         super(plugin, new ThreadExportsCollector(), registry);
     }
 
-    @Override
-    protected void doCollect() {}
-
     private static class ThreadExportsCollector extends Collector {
         private static final ThreadExports threadExports = new ThreadExports();
 

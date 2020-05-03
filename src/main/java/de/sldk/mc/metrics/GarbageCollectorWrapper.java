@@ -13,9 +13,6 @@ public class GarbageCollectorWrapper extends Metric {
         super(plugin, new GarbageCollectorExportsCollector(), registry);
     }
 
-    @Override
-    protected void doCollect() {}
-
     private static class GarbageCollectorExportsCollector extends Collector {
         private static final GarbageCollectorExports garbageCollectorExports = new GarbageCollectorExports();
 
