@@ -1,18 +1,15 @@
 package de.sldk.mc.metrics;
 
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.assertThat;
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.sample;
+import static de.sldk.mc.metrics.CollectorAssertion.assertThat;
+import static de.sldk.mc.metrics.CollectorAssertion.sample;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftVillager;
 import de.sldk.mc.server.MinecraftWorld;
-import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.World;
-import org.bukkit.entity.Villager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,19 +30,15 @@ class VillagersTest {
 
 	private static final String WORLD_NAME = "world_name";
 
-	private CollectorRegistry registry;
-
 	private Villagers villagersMetric;
 
 	@Mock
 	private MinecraftWorld world;
 
 	@BeforeEach
-	void beforeEachTest(@Mock MinecraftApi server) {
-		villagersMetric = new Villagers(registry, server);
-		registry = new CollectorRegistry();
-		registry.register(villagersMetric.getCollector());
-		villagersMetric.enable();
+	void beforeEachTest(@Mock MinecraftApi adapter) {
+		when(adapter.getWorlds()).thenReturn(singletonList(world));
+		villagersMetric = new Villagers(adapter);
 	}
 
 	@Test
@@ -60,9 +53,8 @@ class VillagersTest {
 
 		when(world.getName()).thenReturn(WORLD_NAME);
 		when(world.getVillager()).thenReturn(mockedVillagers);
-		villagersMetric.collect(world);
 
-		assertThat(registry).hasOnly(
+		assertThat(villagersMetric).hasOnly(
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "desert", "farmer", "1"), numOfDesertFarmersLevel1),
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "plains", "none", "2"), numOfPlainsNoneLevel2));
 	}

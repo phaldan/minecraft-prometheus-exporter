@@ -3,14 +3,13 @@ package de.sldk.mc.metrics;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
+import java.util.List;
+import java.util.Objects;
+
 import de.sldk.mc.server.MinecraftWorld;
 import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftVillager;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Get total count of Villagers.
@@ -23,30 +22,35 @@ import java.util.Objects;
  *     <li> Level ({@link MinecraftVillager#getVillagerLevel()})
  * </ul>
  */
-public class Villagers extends WorldMetric {
+public class Villagers extends Metric {
 
-    private static final Gauge VILLAGERS = Gauge.build()
+    private final Gauge collector = Gauge.build()
             .name(prefix("villagers_total"))
             .help("Villagers total count, labelled by world, type, profession, and level")
             .labelNames("world", "type", "profession", "level")
             .create();
 
-    public Villagers(CollectorRegistry registry, MinecraftApi server) {
-        super(VILLAGERS, registry, server);
+    private final MinecraftApi server;
+
+    public Villagers(MinecraftApi server) {
+        this.server = server;
     }
 
     @Override
-    public void collect(MinecraftWorld world) {
-        Map<VillagerGrouping, Long> mapVillagerGroupingToCount = world.getVillager().stream()
-                .collect(groupingBy(VillagerGrouping::new, counting()));
+    public List<MetricFamilySamples> collect() {
+        server.getWorlds().forEach(this::collect);
+        return collector.collect();
+    }
 
-        mapVillagerGroupingToCount.forEach((grouping, count) ->
-                VILLAGERS
-                        .labels(world.getName(),
-                                grouping.type,
-                                grouping.profession,
-                                Integer.toString(grouping.level))
-                        .set(count)
+    private void collect(MinecraftWorld world) {
+        world.getVillager().stream()
+                .collect(groupingBy(VillagerGrouping::new, counting()))
+                .forEach((grouping, count) ->
+                    collector.labels(world.getName(),
+                                     grouping.type,
+                                     grouping.profession,
+                                     Integer.toString(grouping.level))
+                             .set(count)
         );
     }
 

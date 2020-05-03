@@ -1,7 +1,7 @@
 package de.sldk.mc.metrics;
 
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.assertThat;
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.sample;
+import static de.sldk.mc.metrics.CollectorAssertion.assertThat;
+import static de.sldk.mc.metrics.CollectorAssertion.sample;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,16 +26,12 @@ class TickDurationMedianCollectorTest {
 
     private TickDurationMedianCollector metric;
 
-    private CollectorRegistry registry;
-
     @Mock
     private MinecraftApi adapter;
 
     @BeforeEach
     void beforeEachTest() {
-        registry = new CollectorRegistry();
-        metric = new TickDurationMedianCollector(registry, adapter);
-        metric.enable();
+        metric = new TickDurationMedianCollector(adapter);
     }
 
     @ParameterizedTest
@@ -44,9 +39,7 @@ class TickDurationMedianCollectorTest {
     void testCollect(List<Long> times, double expected) {
         when(adapter.getTickDurations()).thenReturn(Optional.of(times));
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_median", expected));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_median", expected));
     }
 
     static Stream<Arguments> testCollect() {
@@ -59,17 +52,13 @@ class TickDurationMedianCollectorTest {
     void testCollectWithAbsentTimes() {
         when(adapter.getTickDurations()).thenReturn(Optional.empty());
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_median", -1));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_median", -1));
     }
 
     @Test
     void testCollectWithEmptyTimes() {
         when(adapter.getTickDurations()).thenReturn(Optional.of(emptyList()));
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_median", -1));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_median", -1));
     }
 }

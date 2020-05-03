@@ -1,30 +1,29 @@
 package de.sldk.mc.metrics;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.list;
 
+import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
-import io.prometheus.client.CollectorRegistry;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class CollectorRegistryAssertion extends AbstractAssert<CollectorRegistryAssertion, CollectorRegistry> {
+public class CollectorAssertion extends AbstractAssert<CollectorAssertion, Collector> {
 
-    private CollectorRegistryAssertion(CollectorRegistry actual) {
-        super(actual, CollectorRegistryAssertion.class);
+    private CollectorAssertion(Collector actual) {
+        super(actual, CollectorAssertion.class);
     }
 
-    public static CollectorRegistryAssertion assertThat(CollectorRegistry actual) {
-        return new CollectorRegistryAssertion(actual);
+    public static CollectorAssertion assertThat(Collector actual) {
+        return new CollectorAssertion(actual);
     }
 
-    public CollectorRegistryAssertion hasOnly(Sample... samples) {
+    public CollectorAssertion hasOnly(Sample... samples) {
         isNotNull();
-        List<MetricFamilySamples> metricFamilies = list(actual.metricFamilySamples());
+        List<MetricFamilySamples> metricFamilies = actual.collect();
         Assertions.assertThat(metricFamilies).hasSize(1);
         MetricFamilySamples metricFamilySamples = metricFamilies.stream()
                 .findFirst()

@@ -20,87 +20,86 @@ import de.sldk.mc.metrics.TickDurationMinCollector;
 import de.sldk.mc.metrics.Tps;
 import de.sldk.mc.metrics.Villagers;
 import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
 
 public class MetricsModule {
 
-    Map<String, Metric> metrics(CollectorRegistry registry, MinecraftApi server) {
+    Map<String, Metric> metrics(MinecraftApi server) {
         Map<String, Metric> metrics = new HashMap<>();
-        metrics.put("entities_total", entities(registry, server));
-        metrics.put("villagers_total", villagers(registry, server));
-        metrics.put("loaded_chunks_total", loadedChunks(registry, server));
-        metrics.put("jvm_memory", memory(registry));
-        metrics.put("players_online_total", playersOnlineTotal(registry, server));
-        metrics.put("players_total", playersTotal(registry, server));
-        metrics.put("tps", tps(registry, server));
-        metrics.put("jvm_threads", threadsWrapper(registry));
-        metrics.put("jvm_gc", garbageCollectorWrapper(registry));
-        metrics.put("tick_duration_median", tickDurationMedianCollector(registry, server));
-        metrics.put("tick_duration_average", tickDurationAverageCollector(registry, server));
-        metrics.put("tick_duration_min", tickDurationMinCollector(registry, server));
-        metrics.put("tick_duration_max", tickDurationMaxCollector(registry, server));
-        metrics.put("player_online", playerOnline(registry, server));
-        metrics.put("player_statistic", playerStatistics(registry, server));
+        metrics.put("entities_total", entities(server));
+        metrics.put("villagers_total", villagers(server));
+        metrics.put("loaded_chunks_total", loadedChunks(server));
+        metrics.put("jvm_memory", memory());
+        metrics.put("players_online_total", playersOnlineTotal(server));
+        metrics.put("players_total", playersTotal(server));
+        metrics.put("tps", tps( server));
+        metrics.put("jvm_threads", threadsWrapper());
+        metrics.put("jvm_gc", garbageCollectorWrapper());
+        metrics.put("tick_duration_median", tickDurationMedianCollector(server));
+        metrics.put("tick_duration_average", tickDurationAverageCollector(server));
+        metrics.put("tick_duration_min", tickDurationMinCollector(server));
+        metrics.put("tick_duration_max", tickDurationMaxCollector(server));
+        metrics.put("player_online", playerOnline(server));
+        metrics.put("player_statistic", playerStatistics(server));
         return metrics;
     }
 
-    private Metric entities(CollectorRegistry registry, MinecraftApi server) {
-        return new Entities(registry, server);
+    private Metric entities(MinecraftApi server) {
+        return new Entities(server);
     }
 
-    private Metric villagers(CollectorRegistry registry, MinecraftApi server) {
-        return new Villagers(registry, server);
+    private Metric villagers(MinecraftApi server) {
+        return new Villagers(server);
     }
 
-    private Metric loadedChunks(CollectorRegistry registry, MinecraftApi server) {
-        return new LoadedChunks(registry, server);
+    private Metric loadedChunks(MinecraftApi server) {
+        return new LoadedChunks(server);
     }
 
-    private Metric memory(CollectorRegistry registry) {
-        return new Memory(registry);
+    private Metric memory() {
+        return new Memory();
     }
 
-    private Metric playersOnlineTotal(CollectorRegistry registry, MinecraftApi server) {
-        return new PlayersOnlineTotal(registry, server);
+    private Metric playersOnlineTotal(MinecraftApi server) {
+        return new PlayersOnlineTotal(server);
     }
 
-    private Metric playersTotal(CollectorRegistry registry, MinecraftApi server) {
-        return new PlayersTotal(registry, server);
+    private Metric playersTotal(MinecraftApi server) {
+        return new PlayersTotal(server);
     }
 
-    private Metric tps(CollectorRegistry registry, MinecraftApi server) {
-        return new Tps(registry, server);
+    private Metric tps(MinecraftApi server) {
+        return new Tps(server);
     }
 
-    private Metric threadsWrapper(CollectorRegistry registry) {
-        return new ThreadsWrapper(registry);
+    private Metric threadsWrapper() {
+        return new ThreadsWrapper();
     }
 
-    private Metric garbageCollectorWrapper(CollectorRegistry registry) {
-        return new GarbageCollectorWrapper(registry);
+    private Metric garbageCollectorWrapper() {
+        return new GarbageCollectorWrapper();
     }
 
-    private Metric tickDurationMedianCollector(CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMedianCollector(registry, server);
+    private Metric tickDurationMedianCollector(MinecraftApi server) {
+        return new TickDurationMedianCollector(server);
     }
 
-    private Metric tickDurationAverageCollector(CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationAverageCollector(registry, server);
+    private Metric tickDurationAverageCollector(MinecraftApi server) {
+        return new TickDurationAverageCollector(server);
     }
 
-    private Metric tickDurationMinCollector(CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMinCollector(registry, server);
+    private Metric tickDurationMinCollector(MinecraftApi server) {
+        return new TickDurationMinCollector(server);
     }
 
-    private Metric tickDurationMaxCollector(CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMaxCollector(registry, server);
+    private Metric tickDurationMaxCollector(MinecraftApi server) {
+        return new TickDurationMaxCollector(server);
     }
 
-    private Metric playerOnline(CollectorRegistry registry, MinecraftApi server) {
-        return new PlayerOnline(registry, server);
+    private Metric playerOnline(MinecraftApi server) {
+        return new PlayerOnline(server);
     }
 
-    private Metric playerStatistics(CollectorRegistry registry, MinecraftApi server) {
-        return new PlayerStatistics(registry, server);
+    private Metric playerStatistics(MinecraftApi server) {
+        return new PlayerStatistics(server);
     }
 }

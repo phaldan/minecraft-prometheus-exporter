@@ -1,7 +1,7 @@
 package de.sldk.mc.metrics;
 
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.assertThat;
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.sample;
+import static de.sldk.mc.metrics.CollectorAssertion.assertThat;
+import static de.sldk.mc.metrics.CollectorAssertion.sample;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.when;
@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,42 +20,32 @@ class TickDurationMaxCollectorTest {
 
     private TickDurationMaxCollector metric;
 
-    private CollectorRegistry registry;
-
     @Mock
     private MinecraftApi adapter;
 
     @BeforeEach
     void beforeEachTest() {
-        registry = new CollectorRegistry();
-        metric = new TickDurationMaxCollector(registry, adapter);
-        metric.enable();
+        metric = new TickDurationMaxCollector(adapter);
     }
 
     @Test
     void testCollect() {
         when(adapter.getTickDurations()).thenReturn(Optional.of(asList(3L, 4L, 2L, 1L)));
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_max", 4));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_max", 4));
     }
 
     @Test
     void testCollectWithAbsentDurations() {
         when(adapter.getTickDurations()).thenReturn(Optional.empty());
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_max", -1));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_max", -1));
     }
 
     @Test
     void testCollectWithEmptyDurations() {
         when(adapter.getTickDurations()).thenReturn(Optional.of(emptyList()));
 
-        metric.doCollect();
-
-        assertThat(registry).hasOnly(sample("mc_tick_duration_max", -1));
+        assertThat(metric).hasOnly(sample("mc_tick_duration_max", -1));
     }
 }

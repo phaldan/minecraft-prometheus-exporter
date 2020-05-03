@@ -1,8 +1,9 @@
 package de.sldk.mc.metrics;
 
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.assertThat;
-import static de.sldk.mc.metrics.CollectorRegistryAssertion.sample;
+import static de.sldk.mc.metrics.CollectorAssertion.assertThat;
+import static de.sldk.mc.metrics.CollectorAssertion.sample;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,7 +11,6 @@ import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftEntity;
 import de.sldk.mc.server.MinecraftEntityType;
 import de.sldk.mc.server.MinecraftWorld;
-import io.prometheus.client.CollectorRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,17 +34,13 @@ class EntitiesTest {
 
 	private Entities entitiesMetric;
 
-	private CollectorRegistry registry;
-
 	@Mock
 	private MinecraftWorld world;
 
 	@BeforeEach
-	void beforeEachTest(@Mock MinecraftApi server) {
-		entitiesMetric = new Entities(registry, server);
-		registry = new CollectorRegistry();
-		registry.register(entitiesMetric.getCollector());
-		entitiesMetric.enable();
+	void beforeEachTest(@Mock MinecraftApi adapter) {
+		when(adapter.getWorlds()).thenReturn(singletonList(world));
+		entitiesMetric = new Entities(adapter);
 	}
 
 	@Test
@@ -65,9 +61,7 @@ class EntitiesTest {
 		when(world.getName()).thenReturn(WORLD_NAME);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
-		entitiesMetric.collect(world);
-
-		assertThat(registry).hasOnly(
+		assertThat(entitiesMetric).hasOnly(
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "pig", "true", "true"), numOfPigs),
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "horse", "true", "true"), numOfHorses),
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "experience_orb", "false", "true"), numOfOrbs),
@@ -84,9 +78,7 @@ class EntitiesTest {
 		when(world.getName()).thenReturn(worldName);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
-		entitiesMetric.collect(world);
-
-		assertThat(registry).hasOnly(
+		assertThat(entitiesMetric).hasOnly(
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "armor_stand", "false", "true"), numOfArmorStands));
 	}
 
@@ -99,9 +91,7 @@ class EntitiesTest {
 		when(world.getName()).thenReturn(worldName);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
-		entitiesMetric.collect(world);
-
-		assertThat(registry).hasOnly(
+		assertThat(entitiesMetric).hasOnly(
 				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "UNKNOWN", "false", "false"), numOfUnknowns));
 	}
 

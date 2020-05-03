@@ -16,18 +16,18 @@ public class MetricService {
     }
 
     public void enableMetrics() {
-        config.getEnabledMetrics().forEach(m -> {
-            registry.register(m);
-            collectorRegistry.register(m.getCollector());
-            m.enable();
+        config.getEnabledMetrics().forEach(metric -> {
+            registry.register(metric);
+            collectorRegistry.register(metric);
+            metric.enable();
         });
     }
 
     public void disableMetrics() {
-        config.getEnabledMetrics().forEach(m -> {
-            registry.unregister(m);
-            collectorRegistry.unregister(m.getCollector());
-            m.disable();
+        config.getEnabledMetrics().forEach(metric -> {
+            registry.unregister(metric);
+            collectorRegistry.unregister(metric);
+            metric.disable();
         });
     }
 }

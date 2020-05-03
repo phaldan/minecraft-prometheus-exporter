@@ -6,7 +6,6 @@ import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftEntityType;
 import de.sldk.mc.server.MinecraftPlayer;
 import de.sldk.mc.server.MinecraftPlayerStatistic;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 
 import java.util.Collections;
@@ -14,28 +13,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class PlayerStatistics extends PlayerMetric {
+public class PlayerStatistics extends Metric {
 
-    private static final Gauge PLAYER_STATS = Gauge.build()
+    private final Gauge collector = Gauge.build()
             .name(prefix("player_statistic"))
             .help("Player statistics")
             .labelNames("player_name", "player_uid", "statistic")
             .create();
 
+    private final MinecraftApi server;
     private final List<MinecraftPlayerStatistic> statistic;
     private final List<MinecraftEntityType> entityTypes;
     private final List<String> materials;
 
-    public PlayerStatistics(CollectorRegistry registry, MinecraftApi server) {
-        super(PLAYER_STATS, registry, server);
+    public PlayerStatistics(MinecraftApi server) {
+        this.server = server;
         statistic = server.getStatistics();
         entityTypes = server.getEntityTypes();
         materials = server.getMaterials();
     }
 
     @Override
-    public void collect(MinecraftPlayer player) {
-        getStatistics(player).forEach((stat, value) -> PLAYER_STATS.labels(player.getName(), player.getUniqueId(), stat).set(value));
+    public List<MetricFamilySamples> collect() {
+        server.getPlayers().forEach(this::collect);
+        return collector.collect();
+    }
+
+    private void collect(MinecraftPlayer player) {
+        getStatistics(player).forEach((stat, value) -> collector.labels(player.getName(), player.getUniqueId(), stat).set(value));
     }
 
     private Map<String, Integer> getStatistics(MinecraftPlayer player) {
@@ -49,7 +54,7 @@ public class PlayerStatistics extends PlayerMetric {
                 .collect(toMap(MinecraftPlayerStatistic::getName, s -> getStatistic(player, s)));
     }
 
-    private Integer getStatistic(MinecraftPlayer player, MinecraftPlayerStatistic statistic) {
+    private int getStatistic(MinecraftPlayer player, MinecraftPlayerStatistic statistic) {
         if (statistic.isUntyped()) {
             return player.getStatistic(statistic);
         } else if (statistic.isEntity()) {

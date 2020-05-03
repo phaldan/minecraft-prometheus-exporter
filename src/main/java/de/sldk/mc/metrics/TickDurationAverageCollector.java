@@ -1,22 +1,20 @@
 package de.sldk.mc.metrics;
 
 import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 
 import java.util.List;
 
 public class TickDurationAverageCollector extends Metric {
 
-    private static final Gauge TD = Gauge.build()
+    private final Gauge collector = Gauge.build()
             .name(prefix("tick_duration_average"))
             .help("Average duration of server tick (nanoseconds)")
             .create();
 
     private final MinecraftApi server;
 
-    public TickDurationAverageCollector(CollectorRegistry registry, MinecraftApi server) {
-        super(TD, registry);
+    public TickDurationAverageCollector(MinecraftApi server) {
         this.server = server;
     }
 
@@ -28,11 +26,12 @@ public class TickDurationAverageCollector extends Metric {
     }
 
     @Override
-    public void doCollect() {
+    public List<MetricFamilySamples> collect() {
         double value = server.getTickDurations()
                 .filter(list -> !list.isEmpty())
                 .map(this::average)
                 .orElse(-1.0);
-        TD.set(value);
+        collector.set(value);
+        return collector.collect();
     }
 }

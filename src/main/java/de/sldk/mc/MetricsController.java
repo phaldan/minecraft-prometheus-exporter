@@ -37,18 +37,13 @@ public class MetricsController extends AbstractHandler {
          * Bukkit API calls have to be made from the main thread.
          * That's why we use the BukkitScheduler to retrieve the server stats.
          * */
-        Future<Object> future = exporter.getServer().getScheduler().callSyncMethod(exporter, () -> {
-            metricRegistry.collectMetrics();
-            return null;
-        });
-
         try {
-            future.get();
-
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(TextFormat.CONTENT_TYPE_004);
-
-            TextFormat.write004(response.getWriter(), registry.metricFamilySamples());
+            exporter.getServer().getScheduler().callSyncMethod(exporter, () -> {
+                TextFormat.write004(response.getWriter(), registry.metricFamilySamples());
+                return null;
+            }).get();
 
             baseRequest.setHandled(true);
         } catch (InterruptedException | ExecutionException e) {

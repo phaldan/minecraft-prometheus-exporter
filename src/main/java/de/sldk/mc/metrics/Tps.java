@@ -1,13 +1,14 @@
 package de.sldk.mc.metrics;
 
+import java.util.List;
+
 import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.tps.TpsCollector;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
 
 public class Tps extends Metric {
 
-    private static final Gauge TPS = Gauge.build()
+    private final Gauge collector = Gauge.build()
             .name(prefix("tps"))
             .help("Server TPS (ticks per second)")
             .create();
@@ -18,25 +19,23 @@ public class Tps extends Metric {
 
     private int taskId;
 
-    public Tps(CollectorRegistry registry, MinecraftApi server) {
-        super(TPS, registry);
+    public Tps(MinecraftApi server) {
         this.server = server;
     }
 
     @Override
+    public List<MetricFamilySamples> collect() {
+        collector.set(tpsCollector.getAverageTPS());
+        return collector.collect();
+    }
+
+    @Override
     public void enable() {
-        super.enable();
         this.taskId = server.scheduleSyncRepeatingTask(tpsCollector, 0, TpsCollector.POLL_INTERVAL);
     }
 
     @Override
     public void disable() {
-        super.disable();
         server.cancelScheduledTask(taskId);
-    }
-
-    @Override
-    public void doCollect() {
-        TPS.set(tpsCollector.getAverageTPS());
     }
 }
