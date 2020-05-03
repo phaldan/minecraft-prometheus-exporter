@@ -5,11 +5,16 @@ import org.bukkit.plugin.Plugin;
 
 public class CoreModule {
 
-    public CollectorRegistry collectorRegistry() {
+    CollectorRegistry collectorRegistry() {
         return new CollectorRegistry();
     }
 
-    public MetricsController metricsController(Plugin bukkitPlugin, CollectorRegistry registry) {
-        return new MetricsController(bukkitPlugin, registry);
+    MetricsController metricsController(Plugin bukkitPlugin, CollectorRegistry registry, MetricRegistry metricRegistry) {
+        return new MetricsController(bukkitPlugin, registry, metricRegistry);
     }
+
+    MetricRegistry metricRegistry() {
+        return new MetricRegistry();
+    }
+
 }

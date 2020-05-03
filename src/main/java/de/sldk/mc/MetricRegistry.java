@@ -7,16 +7,10 @@ import java.util.List;
 
 public class MetricRegistry {
 
-    private static final MetricRegistry INSTANCE = new MetricRegistry();
-    
     private final List<Metric> metrics = new ArrayList<>();
 
-    private MetricRegistry() {
+    public MetricRegistry() {
         
-    }
-    
-    public static MetricRegistry getInstance() {
-        return INSTANCE;
     }
     
     public void register(Metric metric) {

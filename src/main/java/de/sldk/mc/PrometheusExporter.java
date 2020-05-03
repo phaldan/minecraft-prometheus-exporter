@@ -19,11 +19,13 @@ public class PrometheusExporter extends JavaPlugin {
 
     private final CollectorRegistry registry = coreModule.collectorRegistry();
 
-    private final MetricsController controller = coreModule.metricsController(this, registry);
+    private final MetricRegistry metricRegistry = coreModule.metricRegistry();
+
+    private final MetricsController controller = coreModule.metricsController(this, registry, metricRegistry);
 
     private final Map<String, Metric> metrics = metricModule.metrics(this, registry);
 
-    private final PrometheusExporterConfig config = metricModule.prometheusExporterConfig(this, metrics);
+    private final PrometheusExporterConfig config = metricModule.prometheusExporterConfig(this, metrics, metricRegistry);
 
     private Server server;
 

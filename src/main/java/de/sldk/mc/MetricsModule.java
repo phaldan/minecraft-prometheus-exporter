@@ -25,8 +25,8 @@ import org.bukkit.plugin.Plugin;
 
 public class MetricsModule {
 
-    PrometheusExporterConfig prometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics) {
-        return new PrometheusExporterConfig(bukkitPlugin, metrics);
+    PrometheusExporterConfig prometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics, MetricRegistry registry) {
+        return new PrometheusExporterConfig(bukkitPlugin, metrics, registry);
     }
 
     Map<String, Metric> metrics(Plugin bukkitPlugin, CollectorRegistry registry) {

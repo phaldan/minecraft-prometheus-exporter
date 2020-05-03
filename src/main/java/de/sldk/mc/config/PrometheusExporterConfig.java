@@ -12,12 +12,16 @@ public class PrometheusExporterConfig {
 
     public static final PluginConfig<String> HOST = new PluginConfig<>("host");
     public static final PluginConfig<Integer> PORT = new PluginConfig<>("port");
+
     private final List<MetricConfig> metrics = new ArrayList<>();
 
     private final Plugin bukkitPlugin;
 
-    public PrometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics) {
+    private final MetricRegistry registry;
+
+    public PrometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics, MetricRegistry registry) {
         this.bukkitPlugin = bukkitPlugin;
+        this.registry = registry;
         metrics.forEach(this::metricConfig);
     }
 
@@ -43,7 +47,7 @@ public class PrometheusExporterConfig {
 
             bukkitPlugin.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
 
-            MetricRegistry.getInstance().register(metric);
+            registry.register(metric);
         });
     }
 

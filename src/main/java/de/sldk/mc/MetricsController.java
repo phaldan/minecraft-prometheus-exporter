@@ -15,13 +15,14 @@ import java.util.logging.Level;
 
 public class MetricsController extends AbstractHandler {
 
-    private final MetricRegistry metricRegistry = MetricRegistry.getInstance();
+    private final MetricRegistry metricRegistry;
     private final Plugin exporter;
     private final CollectorRegistry registry;
 
-    public MetricsController(Plugin exporter, CollectorRegistry registry) {
+    public MetricsController(Plugin exporter, CollectorRegistry registry, MetricRegistry metricRegistry) {
         this.exporter = exporter;
         this.registry = registry;
+        this.metricRegistry = metricRegistry;
     }
 
     @Override
