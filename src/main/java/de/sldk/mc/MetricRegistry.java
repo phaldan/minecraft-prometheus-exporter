@@ -9,12 +9,15 @@ public class MetricRegistry {
 
     private final List<Metric> metrics = new ArrayList<>();
 
-    public MetricRegistry() {
-        
+    MetricRegistry() {
     }
-    
+
     public void register(Metric metric) {
-        this.metrics.add(metric);
+        metrics.add(metric);
+    }
+
+    public void unregister(Metric metric) {
+        metrics.remove(metric);
     }
 
     void collectMetrics() {

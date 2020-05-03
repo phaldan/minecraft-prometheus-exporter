@@ -14,8 +14,6 @@ public abstract class Metric {
     private final Collector collector;
     private final CollectorRegistry registry;
 
-    private boolean enabled = false;
-
     protected Metric(Plugin plugin, Collector collector, CollectorRegistry registry) {
         this.plugin = plugin;
         this.collector = collector;
@@ -23,11 +21,6 @@ public abstract class Metric {
     }
 
     public void collect() {
-
-        if (!enabled) {
-            return;
-        }
-
         try {
             doCollect();
         } catch (Exception e) {
@@ -52,11 +45,9 @@ public abstract class Metric {
 
     public void enable() {
         registry.register(collector);
-        enabled = true;
     }
 
     public void disable() {
         registry.unregister(collector);
-        enabled = false;
     }
 }

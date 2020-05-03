@@ -28,7 +28,9 @@ public class PrometheusExporter extends JavaPlugin {
 
     private final Map<String, Metric> metrics = metricModule.metrics(this, registry, minecraftServer);
 
-    private final PrometheusExporterConfig config = metricModule.prometheusExporterConfig(this, metrics, metricRegistry);
+    private final PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer, metrics);
+
+    private final MetricService service = coreModule.metricService(config, metricRegistry);
 
     private Server server;
 
@@ -36,7 +38,7 @@ public class PrometheusExporter extends JavaPlugin {
     public void onEnable() {
         config.loadDefaultsAndSave();
 
-        config.enableConfiguredMetrics();
+        service.enableMetrics();
 
         serveMetrics();
     }

@@ -1,27 +1,28 @@
 package de.sldk.mc.config;
 
-import de.sldk.mc.MetricRegistry;
-import de.sldk.mc.metrics.*;
-import org.bukkit.plugin.Plugin;
+import de.sldk.mc.logging.Logger;
+import de.sldk.mc.logging.LoggerFactory;
+import de.sldk.mc.metrics.Metric;
+import de.sldk.mc.server.MinecraftApi;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PrometheusExporterConfig {
 
     public static final PluginConfig<String> HOST = new PluginConfig<>("host");
     public static final PluginConfig<Integer> PORT = new PluginConfig<>("port");
 
+    private final Logger logger = LoggerFactory.getLogger();
+
     private final List<MetricConfig> metrics = new ArrayList<>();
 
-    private final Plugin bukkitPlugin;
+    private final MinecraftApi server;
 
-    private final MetricRegistry registry;
-
-    public PrometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics, MetricRegistry registry) {
-        this.bukkitPlugin = bukkitPlugin;
-        this.registry = registry;
+    public PrometheusExporterConfig(MinecraftApi server, Map<String, Metric> metrics) {
+        this.server = server;
         metrics.forEach(this::metricConfig);
     }
 
@@ -31,27 +32,27 @@ public class PrometheusExporterConfig {
     }
 
     public void loadDefaultsAndSave() {
-        bukkitPlugin.saveDefaultConfig();
-        bukkitPlugin.getConfig().options().copyDefaults(false);
-        bukkitPlugin.saveConfig();
+        server.loadDefaultConfig();
     }
 
-    public void enableConfiguredMetrics() {
-        metrics.forEach(metricConfig -> {
-            Metric metric = metricConfig.getMetric();
-            Boolean enabled = get(metricConfig);
+    public List<Metric> getEnabledMetrics() {
+        return metrics.stream()
+                .filter(this::isMetricEnabled)
+                .map(this::getEnabledMetric)
+                .collect(Collectors.toList());
+    }
 
-            if (Boolean.TRUE.equals(enabled)) {
-                metric.enable();
-            }
+    private boolean isMetricEnabled(MetricConfig config) {
+        return config.get(server);
+    }
 
-            bukkitPlugin.getLogger().fine("Metric " + metric.getClass().getSimpleName() + " enabled: " + enabled);
-
-            registry.register(metric);
-        });
+    private Metric getEnabledMetric(MetricConfig config) {
+        Metric metric = config.getMetric();
+        logger.info("Enable metric {0} ({1})", metric.getClass().getSimpleName(), config.key);
+        return metric;
     }
 
     public <T> T get(PluginConfig<T> config) {
-        return config.get(bukkitPlugin.getConfig());
+        return config.get(server);
     }
 }

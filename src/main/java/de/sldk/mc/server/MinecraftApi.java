@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.Statistic;
 import org.bukkit.entity.EntityType;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -30,6 +31,8 @@ public class MinecraftApi {
 
     private final BukkitScheduler scheduler;
 
+    private final FileConfiguration config;
+
     /*
      * If reflection is successful, this will hold a reference directly to the
      * MinecraftServer internal tick duration tracker
@@ -38,6 +41,7 @@ public class MinecraftApi {
 
     public MinecraftApi(Plugin plugin) {
         this.plugin = plugin;
+        this.config = plugin.getConfig();
         this.bukkitServer = plugin.getServer();
         this.scheduler = bukkitServer.getScheduler();
     }
@@ -124,5 +128,15 @@ public class MinecraftApi {
             logger.warn("Caught exception looking for tick times array: ", e);
         }
         return ofNullable(longestArray);
+    }
+
+    public Object getConfig(String fullPath) {
+        return config.get(fullPath);
+    }
+
+    public void loadDefaultConfig() {
+        plugin.saveDefaultConfig();
+        config.options().copyDefaults(false);
+        plugin.saveConfig();
     }
 }

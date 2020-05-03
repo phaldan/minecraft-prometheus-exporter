@@ -3,7 +3,6 @@ package de.sldk.mc;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.sldk.mc.config.PrometheusExporterConfig;
 import de.sldk.mc.metrics.Entities;
 import de.sldk.mc.metrics.GarbageCollectorWrapper;
 import de.sldk.mc.metrics.LoadedChunks;
@@ -25,10 +24,6 @@ import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.Plugin;
 
 public class MetricsModule {
-
-    PrometheusExporterConfig prometheusExporterConfig(Plugin bukkitPlugin, Map<String, Metric> metrics, MetricRegistry registry) {
-        return new PrometheusExporterConfig(bukkitPlugin, metrics, registry);
-    }
 
     Map<String, Metric> metrics(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
         Map<String, Metric> metrics = new HashMap<>();

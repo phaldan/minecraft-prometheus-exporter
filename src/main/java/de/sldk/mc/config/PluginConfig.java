@@ -1,6 +1,6 @@
 package de.sldk.mc.config;
 
-import org.bukkit.configuration.file.FileConfiguration;
+import de.sldk.mc.server.MinecraftApi;
 
 public class PluginConfig<T> {
 
@@ -11,7 +11,7 @@ public class PluginConfig<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public T get(FileConfiguration config) {
-        return (T) config.get(this.key);
+    public T get(MinecraftApi server) {
+        return (T) server.getConfig(this.key);
     }
 }
