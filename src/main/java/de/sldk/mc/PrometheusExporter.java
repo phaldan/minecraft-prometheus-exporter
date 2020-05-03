@@ -1,29 +1,34 @@
 package de.sldk.mc;
 
 import de.sldk.mc.config.PrometheusExporterConfig;
+import de.sldk.mc.metrics.Metric;
 import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.logging.Level;
 
 public class PrometheusExporter extends JavaPlugin {
 
     private final CoreModule coreModule = new CoreModule();
 
+    private final MetricsModule metricModule = new MetricsModule();
+
     private final CollectorRegistry registry = coreModule.collectorRegistry();
 
-    private final PrometheusExporterConfig config = new PrometheusExporterConfig(this, registry);
-
     private final MetricsController controller = coreModule.metricsController(this, registry);
+
+    private final Map<String, Metric> metrics = metricModule.metrics(this, registry);
+
+    private final PrometheusExporterConfig config = metricModule.prometheusExporterConfig(this, metrics);
 
     private Server server;
 
     @Override
     public void onEnable() {
-
         config.loadDefaultsAndSave();
 
         config.enableConfiguredMetrics();
