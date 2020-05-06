@@ -21,12 +21,13 @@ public class CoreModule {
     MetricService metricService(
             PrometheusExporterConfig config,
             MetricRegistry metricRegistry,
-            CollectorRegistry collectorRegistry) {
-        return new MetricService(config, metricRegistry, collectorRegistry);
+            CollectorRegistry collectorRegistry,
+            Map<String, Metric> metrics) {
+        return new MetricService(config, metricRegistry, collectorRegistry, metrics);
     }
 
-    PrometheusExporterConfig prometheusExporterConfig(MinecraftApi server, Map<String, Metric> metrics) {
-        return new PrometheusExporterConfig(server, metrics);
+    PrometheusExporterConfig prometheusExporterConfig(MinecraftApi server) {
+        return new PrometheusExporterConfig(server);
     }
 
     MetricRegistry metricRegistry() {

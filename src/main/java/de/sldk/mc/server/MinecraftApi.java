@@ -134,6 +134,10 @@ public class MinecraftApi {
         return config.get(fullPath);
     }
 
+    public Boolean getConfigAsBoolean(String fullPath) {
+        return config.getBoolean(fullPath);
+    }
+
     public void loadDefaultConfig() {
         plugin.saveDefaultConfig();
         config.options().copyDefaults(false);

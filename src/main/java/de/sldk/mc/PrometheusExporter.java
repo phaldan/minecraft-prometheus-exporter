@@ -26,11 +26,11 @@ public class PrometheusExporter extends JavaPlugin {
 
     private final MinecraftApi minecraftServer = coreModule.minecraftPluginAdapter(this);
 
+    private final PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer);
+
     private final Map<String, Metric> metrics = metricModule.metrics(minecraftServer);
 
-    private final PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer, metrics);
-
-    private final MetricService service = coreModule.metricService(config, metricRegistry, registry);
+    private final MetricService service = coreModule.metricService(config, metricRegistry, registry, metrics);
 
     private Server server;
 
