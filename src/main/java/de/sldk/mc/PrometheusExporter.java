@@ -5,7 +5,6 @@ import de.sldk.mc.metrics.Metric;
 import de.sldk.mc.server.MinecraftApi;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,11 +40,10 @@ public class PrometheusExporter extends JavaPlugin {
         CoreModule coreModule = new CoreModule();
         MetricsModule metricModule = new MetricsModule();
         MicrometerModule micrometerModule = new MicrometerModule();
-        CollectorRegistry registry = coreModule.collectorRegistry();
-        PrometheusMeterRegistry meterRegistry = micrometerModule.prometheusMeterRegistry(registry);
+        PrometheusMeterRegistry meterRegistry = micrometerModule.prometheusMeterRegistry();
         MetricRegistry metricRegistry = coreModule.metricRegistry(meterRegistry);
         MinecraftApi minecraftServer = coreModule.minecraftPluginAdapter(plugin);
-        MetricsController controller = coreModule.metricsController(minecraftServer, registry, metricRegistry);
+        MetricsController controller = coreModule.metricsController(minecraftServer, metricRegistry);
         PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer);
         Map<String, Metric> metrics = metricModule.metrics(minecraftServer);
         Map<String, List<MeterBinder>> meterBinders = micrometerModule.meterBinders();

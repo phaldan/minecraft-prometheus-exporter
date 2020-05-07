@@ -5,6 +5,8 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -44,6 +46,8 @@ public class MetricRegistry {
         meterRegistry.clear();
     }
 
-    public void collectMetrics() {
+    public Void collectMetrics(Writer writer) throws IOException {
+        meterRegistry.scrape(writer);
+        return null;
     }
 }

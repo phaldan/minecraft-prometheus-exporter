@@ -3,7 +3,6 @@ package de.sldk.mc;
 import de.sldk.mc.logging.Logger;
 import de.sldk.mc.logging.LoggerFactory;
 import de.sldk.mc.server.MinecraftApi;
-import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
@@ -15,6 +14,7 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.ExecutionException;
 
 public class MetricsController extends AbstractHandler {
@@ -22,12 +22,10 @@ public class MetricsController extends AbstractHandler {
     private final Logger logger = LoggerFactory.getLogger();
     private final MetricRegistry metricRegistry;
     private final MinecraftApi minecraftServer;
-    private final CollectorRegistry registry;
     private final Server server;
 
-    public MetricsController(MinecraftApi minecraftServer, CollectorRegistry registry, MetricRegistry metricRegistry, Server server) {
+    public MetricsController(MinecraftApi minecraftServer, MetricRegistry metricRegistry, Server server) {
         this.minecraftServer = minecraftServer;
-        this.registry = registry;
         this.metricRegistry = metricRegistry;
         this.server = server;
     }
@@ -73,15 +71,11 @@ public class MetricsController extends AbstractHandler {
          * Bukkit API calls have to be made from the main thread.
          * That's why we use the BukkitScheduler to retrieve the server stats.
          * */
+        PrintWriter writer = response.getWriter();
         try {
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType(TextFormat.CONTENT_TYPE_004);
-            minecraftServer.callSyncMethod(() -> {
-                metricRegistry.collectMetrics();
-                TextFormat.write004(response.getWriter(), registry.metricFamilySamples());
-                return null;
-            }).get();
-
+            minecraftServer.callSyncMethod(() -> metricRegistry.collectMetrics(writer)).get();
             baseRequest.setHandled(true);
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("Failed to read server statistic: ", e);

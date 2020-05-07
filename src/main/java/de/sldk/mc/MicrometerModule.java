@@ -24,8 +24,8 @@ public class MicrometerModule {
 
     private static final String SHARED_GROUP = "micrometer_jvm";
 
-    PrometheusMeterRegistry prometheusMeterRegistry(CollectorRegistry collectorRegistry) {
-        return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT, collectorRegistry, Clock.SYSTEM);
+    PrometheusMeterRegistry prometheusMeterRegistry() {
+        return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT, new CollectorRegistry(), Clock.SYSTEM);
     }
 
     Map<String, List<MeterBinder>> meterBinders() {
