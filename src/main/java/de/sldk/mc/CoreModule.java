@@ -38,4 +38,8 @@ public class CoreModule {
     MinecraftApi minecraftPluginAdapter(Plugin plugin) {
         return new MinecraftApi(plugin);
     }
+
+    ExporterService exporterService(PrometheusExporterConfig config, MetricService service, MetricsController controller) {
+        return new ExporterService(config, service, controller);
+    }
 }

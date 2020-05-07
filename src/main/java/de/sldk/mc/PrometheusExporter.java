@@ -4,49 +4,46 @@ import de.sldk.mc.config.PrometheusExporterConfig;
 import de.sldk.mc.metrics.Metric;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
+
 public class PrometheusExporter extends JavaPlugin {
 
-    private final CoreModule coreModule = new CoreModule();
+    private ExporterService service;
 
-    private final MetricsModule metricModule = new MetricsModule();
-
-    private final CollectorRegistry registry = coreModule.collectorRegistry();
-
-    private final MetricRegistry metricRegistry = coreModule.metricRegistry();
-
-    private final MinecraftApi minecraftServer = coreModule.minecraftPluginAdapter(this);
-
-    private final MetricsController controller = coreModule.metricsController(minecraftServer, registry, metricRegistry);
-
-    private final PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer);
-
-    private final Map<String, Metric> metrics = metricModule.metrics(minecraftServer);
-
-    private final MetricService service = coreModule.metricService(config, metricRegistry, registry, metrics);
+    @Override
+    public void onLoad() {
+        service = createServiceInstance(this);
+    }
 
     @Override
     public void onEnable() {
-        config.loadDefaultsAndSave();
-
-        service.enableMetrics();
-
-        serveMetrics();
-    }
-
-    private void serveMetrics() {
-        int port = config.get(PrometheusExporterConfig.PORT);
-        String host = config.get(PrometheusExporterConfig.HOST);
-        controller.startServer(host, port);
+        if (nonNull(service)) {
+            service.setup();
+        }
     }
 
     @Override
     public void onDisable() {
-        controller.stopServer();
-        service.disableMetrics();
+        if (nonNull(service)) {
+            service.teardown();
+        }
     }
 
+    static ExporterService createServiceInstance(Plugin plugin) {
+        CoreModule coreModule = new CoreModule();
+        MetricsModule metricModule = new MetricsModule();
+        CollectorRegistry registry = coreModule.collectorRegistry();
+        MetricRegistry metricRegistry = coreModule.metricRegistry();
+        MinecraftApi minecraftServer = coreModule.minecraftPluginAdapter(plugin);
+        MetricsController controller = coreModule.metricsController(minecraftServer, registry, metricRegistry);
+        PrometheusExporterConfig config = coreModule.prometheusExporterConfig(minecraftServer);
+        Map<String, Metric> metrics = metricModule.metrics(minecraftServer);
+        MetricService service = coreModule.metricService(config, metricRegistry, registry, metrics);
+        return coreModule.exporterService(config, service, controller);
+    }
 }
