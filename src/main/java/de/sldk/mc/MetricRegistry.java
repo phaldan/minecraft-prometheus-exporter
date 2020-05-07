@@ -19,4 +19,7 @@ public class MetricRegistry {
     public void unregister(Metric metric) {
         metrics.remove(metric);
     }
+
+    public void collectMetrics() {
+    }
 }

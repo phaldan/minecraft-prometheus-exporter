@@ -18,6 +18,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 public class MinecraftApi {
 
@@ -52,6 +54,10 @@ public class MinecraftApi {
 
     public void cancelScheduledTask(int taskId) {
         scheduler.cancelTask(taskId);
+    }
+
+    public <T> Future<T> callSyncMethod(Callable<T> callable) {
+        return scheduler.callSyncMethod(plugin, callable);
     }
 
     public List<MinecraftWorld> getWorlds() {

@@ -5,6 +5,7 @@ import de.sldk.mc.config.PrometheusExporterConfig;
 import de.sldk.mc.metrics.Metric;
 import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.Plugin;
+import org.eclipse.jetty.server.Server;
 
 import java.util.Map;
 
@@ -14,8 +15,8 @@ public class CoreModule {
         return new CollectorRegistry();
     }
 
-    MetricsController metricsController(Plugin bukkitPlugin, CollectorRegistry registry, MetricRegistry metricRegistry) {
-        return new MetricsController(bukkitPlugin, registry, metricRegistry);
+    MetricsController metricsController(MinecraftApi minecraftServer, CollectorRegistry registry, MetricRegistry metricRegistry) {
+        return new MetricsController(minecraftServer, registry, metricRegistry, new Server());
     }
 
     MetricService metricService(
