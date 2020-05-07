@@ -1,23 +1,47 @@
 package de.sldk.mc;
 
 import de.sldk.mc.metrics.Metric;
+import io.micrometer.core.instrument.binder.MeterBinder;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.prometheus.client.CollectorRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class MetricRegistry {
 
-    private final List<Metric> metrics = new ArrayList<>();
+    private final Collection<Metric> metrics = new HashSet<>();
 
-    MetricRegistry() {
+    private final Collection<MeterBinder> binders = new HashSet<>();
+
+    private final PrometheusMeterRegistry meterRegistry;
+
+    private final CollectorRegistry collectorRegistry;
+
+    MetricRegistry(PrometheusMeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+        this.collectorRegistry = meterRegistry.getPrometheusRegistry();
     }
 
     public void register(Metric metric) {
-        metrics.add(metric);
+        if (metrics.add(metric)) {
+            collectorRegistry.register(metric);
+            metric.enable();
+        }
     }
 
-    public void unregister(Metric metric) {
-        metrics.remove(metric);
+    public void register(MeterBinder meterBinder) {
+        if (binders.add(meterBinder)) {
+            meterBinder.bindTo(meterRegistry);
+        }
+    }
+
+    public void clear() {
+        metrics.forEach(Metric::disable);
+        metrics.clear();
+        binders.clear();
+        collectorRegistry.clear();
+        meterRegistry.clear();
     }
 
     public void collectMetrics() {

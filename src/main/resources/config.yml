@@ -16,3 +16,8 @@ enable_metrics:
   tick_duration_max: true
   player_online: false
   player_statistic: false
+  micrometer_jvm: true
+  micrometer_jvm_gc: false
+  micrometer_jvm_memory: false
+  micrometer_jvm_threads: false
+  micrometer_jvm_class_loader: false

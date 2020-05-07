@@ -16,6 +16,7 @@
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <org.mockito.version>3.3.3</org.mockito.version>
         <assertj.version>3.16.0</assertj.version>
+        <micrometer.version>1.5.0</micrometer.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
@@ -52,14 +53,15 @@
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
-            <artifactId>simpleclient_common</artifactId>
-            <version>${prometheus-client.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
             <version>${prometheus-client.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
