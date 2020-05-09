@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,9 +27,9 @@ class TickDurationMaxCollectorTest {
     private MinecraftApi adapter;
 
     @BeforeEach
-    void beforeEachTest(@Mock Plugin plugin) {
+    void beforeEachTest() {
         registry = new CollectorRegistry();
-        metric = new TickDurationMaxCollector(plugin, registry, adapter);
+        metric = new TickDurationMaxCollector(registry, adapter);
         metric.enable();
     }
 
@@ -38,7 +37,7 @@ class TickDurationMaxCollectorTest {
     void testCollect() {
         when(adapter.getTickDurations()).thenReturn(Optional.of(asList(3L, 4L, 2L, 1L)));
 
-        metric.collect();
+        metric.doCollect();
 
         assertThat(registry).hasOnly(sample("mc_tick_duration_max", 4));
     }
@@ -47,7 +46,7 @@ class TickDurationMaxCollectorTest {
     void testCollectWithAbsentDurations() {
         when(adapter.getTickDurations()).thenReturn(Optional.empty());
 
-        metric.collect();
+        metric.doCollect();
 
         assertThat(registry).hasOnly(sample("mc_tick_duration_max", -1));
     }
@@ -56,7 +55,7 @@ class TickDurationMaxCollectorTest {
     void testCollectWithEmptyDurations() {
         when(adapter.getTickDurations()).thenReturn(Optional.of(emptyList()));
 
-        metric.collect();
+        metric.doCollect();
 
         assertThat(registry).hasOnly(sample("mc_tick_duration_max", -1));
     }

@@ -6,12 +6,11 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftEntity;
 import de.sldk.mc.server.MinecraftEntityType;
 import de.sldk.mc.server.MinecraftWorld;
-import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,9 +40,9 @@ class EntitiesTest {
 	private MinecraftWorld world;
 
 	@BeforeEach
-	void beforeEachTest(@Mock Plugin plugin) {
+	void beforeEachTest(@Mock MinecraftApi server) {
 		registry = new CollectorRegistry();
-		entitiesMetric = new Entities(plugin, registry, mock(MinecraftApi.class));
+		entitiesMetric = new Entities(registry, server);
 		entitiesMetric.enable();
 	}
 

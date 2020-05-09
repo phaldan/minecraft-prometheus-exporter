@@ -3,7 +3,6 @@ package de.sldk.mc.metrics;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 public class PlayersTotal extends Metric {
 
@@ -14,8 +13,8 @@ public class PlayersTotal extends Metric {
 
     private final MinecraftApi server;
 
-    public PlayersTotal(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, PLAYERS, registry);
+    public PlayersTotal(CollectorRegistry registry, MinecraftApi server) {
+        super(PLAYERS, registry);
         this.server = server;
     }
 

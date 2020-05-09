@@ -4,14 +4,13 @@ import de.sldk.mc.server.MinecraftPlayer;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
 
 public abstract class PlayerMetric extends Metric {
 
     private final MinecraftApi server;
 
-    public PlayerMetric(Plugin plugin, Collector collector, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, collector, registry);
+    public PlayerMetric(Collector collector, CollectorRegistry registry, MinecraftApi server) {
+        super(collector, registry);
         this.server = server;
     }
 

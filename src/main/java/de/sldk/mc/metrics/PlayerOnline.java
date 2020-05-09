@@ -4,7 +4,6 @@ import de.sldk.mc.server.MinecraftPlayer;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 public class PlayerOnline extends PlayerMetric {
 
@@ -14,8 +13,8 @@ public class PlayerOnline extends PlayerMetric {
             .labelNames("name", "uid")
             .create();
 
-    public PlayerOnline(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, PLAYERS_WITH_NAMES, registry, server);
+    public PlayerOnline(CollectorRegistry registry, MinecraftApi server) {
+        super(PLAYERS_WITH_NAMES, registry, server);
     }
 
     @Override

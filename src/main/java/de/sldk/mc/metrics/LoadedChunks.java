@@ -4,7 +4,6 @@ import de.sldk.mc.server.MinecraftWorld;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 public class LoadedChunks extends WorldMetric {
 
@@ -14,8 +13,8 @@ public class LoadedChunks extends WorldMetric {
             .labelNames("world")
             .create();
 
-    public LoadedChunks(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, LOADED_CHUNKS, registry, server);
+    public LoadedChunks(CollectorRegistry registry, MinecraftApi server) {
+        super(LOADED_CHUNKS, registry, server);
     }
 
     @Override

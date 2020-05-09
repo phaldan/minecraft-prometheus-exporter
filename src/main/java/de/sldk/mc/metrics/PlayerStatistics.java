@@ -8,7 +8,6 @@ import de.sldk.mc.server.MinecraftPlayer;
 import de.sldk.mc.server.MinecraftPlayerStatistic;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +26,8 @@ public class PlayerStatistics extends PlayerMetric {
     private final List<MinecraftEntityType> entityTypes;
     private final List<String> materials;
 
-    public PlayerStatistics(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, PLAYER_STATS, registry, server);
+    public PlayerStatistics(CollectorRegistry registry, MinecraftApi server) {
+        super(PLAYER_STATS, registry, server);
         statistic = server.getStatistics();
         entityTypes = server.getEntityTypes();
         materials = server.getMaterials();

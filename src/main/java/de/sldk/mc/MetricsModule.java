@@ -21,87 +21,86 @@ import de.sldk.mc.metrics.Tps;
 import de.sldk.mc.metrics.Villagers;
 import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
 
 public class MetricsModule {
 
-    Map<String, Metric> metrics(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
+    Map<String, Metric> metrics(CollectorRegistry registry, MinecraftApi server) {
         Map<String, Metric> metrics = new HashMap<>();
-        metrics.put("entities_total", entities(bukkitPlugin, registry, server));
-        metrics.put("villagers_total", villagers(bukkitPlugin, registry, server));
-        metrics.put("loaded_chunks_total", loadedChunks(bukkitPlugin, registry, server));
-        metrics.put("jvm_memory", memory(bukkitPlugin, registry));
-        metrics.put("players_online_total", playersOnlineTotal(bukkitPlugin, registry, server));
-        metrics.put("players_total", playersTotal(bukkitPlugin, registry, server));
-        metrics.put("tps", tps(bukkitPlugin, registry, server));
-        metrics.put("jvm_threads", threadsWrapper(bukkitPlugin, registry));
-        metrics.put("jvm_gc", garbageCollectorWrapper(bukkitPlugin, registry));
-        metrics.put("tick_duration_median", tickDurationMedianCollector(bukkitPlugin, registry, server));
-        metrics.put("tick_duration_average", tickDurationAverageCollector(bukkitPlugin, registry, server));
-        metrics.put("tick_duration_min", tickDurationMinCollector(bukkitPlugin, registry, server));
-        metrics.put("tick_duration_max", tickDurationMaxCollector(bukkitPlugin, registry, server));
-        metrics.put("player_online", playerOnline(bukkitPlugin, registry, server));
-        metrics.put("player_statistic", playerStatistics(bukkitPlugin, registry, server));
+        metrics.put("entities_total", entities(registry, server));
+        metrics.put("villagers_total", villagers(registry, server));
+        metrics.put("loaded_chunks_total", loadedChunks(registry, server));
+        metrics.put("jvm_memory", memory(registry));
+        metrics.put("players_online_total", playersOnlineTotal(registry, server));
+        metrics.put("players_total", playersTotal(registry, server));
+        metrics.put("tps", tps(registry, server));
+        metrics.put("jvm_threads", threadsWrapper(registry));
+        metrics.put("jvm_gc", garbageCollectorWrapper(registry));
+        metrics.put("tick_duration_median", tickDurationMedianCollector(registry, server));
+        metrics.put("tick_duration_average", tickDurationAverageCollector(registry, server));
+        metrics.put("tick_duration_min", tickDurationMinCollector(registry, server));
+        metrics.put("tick_duration_max", tickDurationMaxCollector(registry, server));
+        metrics.put("player_online", playerOnline(registry, server));
+        metrics.put("player_statistic", playerStatistics(registry, server));
         return metrics;
     }
 
-    private Metric entities(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new Entities(bukkitPlugin, registry, server);
+    private Metric entities(CollectorRegistry registry, MinecraftApi server) {
+        return new Entities(registry, server);
     }
 
-    private Metric villagers(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new Villagers(bukkitPlugin, registry, server);
+    private Metric villagers(CollectorRegistry registry, MinecraftApi server) {
+        return new Villagers(registry, server);
     }
 
-    private Metric loadedChunks(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new LoadedChunks(bukkitPlugin, registry, server);
+    private Metric loadedChunks(CollectorRegistry registry, MinecraftApi server) {
+        return new LoadedChunks(registry, server);
     }
 
-    private Metric memory(Plugin bukkitPlugin, CollectorRegistry registry) {
-        return new Memory(bukkitPlugin, registry);
+    private Metric memory(CollectorRegistry registry) {
+        return new Memory(registry);
     }
 
-    private Metric playersOnlineTotal(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new PlayersOnlineTotal(bukkitPlugin, registry, server);
+    private Metric playersOnlineTotal(CollectorRegistry registry, MinecraftApi server) {
+        return new PlayersOnlineTotal(registry, server);
     }
 
-    private Metric playersTotal(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new PlayersTotal(bukkitPlugin, registry, server);
+    private Metric playersTotal(CollectorRegistry registry, MinecraftApi server) {
+        return new PlayersTotal(registry, server);
     }
 
-    private Metric tps(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new Tps(bukkitPlugin, registry, server);
+    private Metric tps(CollectorRegistry registry, MinecraftApi server) {
+        return new Tps(registry, server);
     }
 
-    private Metric threadsWrapper(Plugin bukkitPlugin, CollectorRegistry registry) {
-        return new ThreadsWrapper(bukkitPlugin, registry);
+    private Metric threadsWrapper(CollectorRegistry registry) {
+        return new ThreadsWrapper(registry);
     }
 
-    private Metric garbageCollectorWrapper(Plugin bukkitPlugin, CollectorRegistry registry) {
-        return new GarbageCollectorWrapper(bukkitPlugin, registry);
+    private Metric garbageCollectorWrapper(CollectorRegistry registry) {
+        return new GarbageCollectorWrapper(registry);
     }
 
-    private Metric tickDurationMedianCollector(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMedianCollector(bukkitPlugin, registry, server);
+    private Metric tickDurationMedianCollector(CollectorRegistry registry, MinecraftApi server) {
+        return new TickDurationMedianCollector(registry, server);
     }
 
-    private Metric tickDurationAverageCollector(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationAverageCollector(bukkitPlugin, registry, server);
+    private Metric tickDurationAverageCollector(CollectorRegistry registry, MinecraftApi server) {
+        return new TickDurationAverageCollector(registry, server);
     }
 
-    private Metric tickDurationMinCollector(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMinCollector(bukkitPlugin, registry, server);
+    private Metric tickDurationMinCollector(CollectorRegistry registry, MinecraftApi server) {
+        return new TickDurationMinCollector(registry, server);
     }
 
-    private Metric tickDurationMaxCollector(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new TickDurationMaxCollector(bukkitPlugin, registry, server);
+    private Metric tickDurationMaxCollector(CollectorRegistry registry, MinecraftApi server) {
+        return new TickDurationMaxCollector(registry, server);
     }
 
-    private Metric playerOnline(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new PlayerOnline(bukkitPlugin, registry, server);
+    private Metric playerOnline(CollectorRegistry registry, MinecraftApi server) {
+        return new PlayerOnline(registry, server);
     }
 
-    private Metric playerStatistics(Plugin bukkitPlugin, CollectorRegistry registry, MinecraftApi server) {
-        return new PlayerStatistics(bukkitPlugin, registry, server);
+    private Metric playerStatistics(CollectorRegistry registry, MinecraftApi server) {
+        return new PlayerStatistics(registry, server);
     }
 }

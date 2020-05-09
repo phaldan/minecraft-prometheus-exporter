@@ -2,7 +2,6 @@ package de.sldk.mc.metrics;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.plugin.Plugin;
 
 public abstract class Metric {
 
@@ -11,7 +10,7 @@ public abstract class Metric {
     private final Collector collector;
     private final CollectorRegistry registry;
 
-    protected Metric(Plugin plugin, Collector collector, CollectorRegistry registry) {
+    protected Metric(Collector collector, CollectorRegistry registry) {
         this.collector = collector;
         this.registry = registry;
     }

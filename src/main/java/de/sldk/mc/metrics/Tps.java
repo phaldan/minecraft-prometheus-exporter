@@ -4,7 +4,6 @@ import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.tps.TpsCollector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 public class Tps extends Metric {
 
@@ -19,8 +18,8 @@ public class Tps extends Metric {
 
     private int taskId;
 
-    public Tps(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, TPS, registry);
+    public Tps(CollectorRegistry registry, MinecraftApi server) {
+        super(TPS, registry);
         this.server = server;
     }
 

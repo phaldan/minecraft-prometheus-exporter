@@ -8,7 +8,6 @@ import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.server.MinecraftVillager;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.Objects;
@@ -32,8 +31,8 @@ public class Villagers extends WorldMetric {
             .labelNames("world", "type", "profession", "level")
             .create();
 
-    public Villagers(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, VILLAGERS, registry, server);
+    public Villagers(CollectorRegistry registry, MinecraftApi server) {
+        super(VILLAGERS, registry, server);
     }
 
     @Override

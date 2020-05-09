@@ -10,7 +10,6 @@ import de.sldk.mc.server.MinecraftEntityType;
 import de.sldk.mc.server.MinecraftWorld;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 
@@ -38,8 +37,8 @@ public class Entities extends WorldMetric {
      */
     private static final Map<String, Boolean> ALIVE_OVERRIDE = singletonMap("armor_stand", false);
 
-    public Entities(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
-        super(plugin, ENTITIES, registry, server);
+    public Entities(CollectorRegistry registry, MinecraftApi server) {
+        super(ENTITIES, registry, server);
         ENTITIES.clear();
     }
 
