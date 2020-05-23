@@ -3,6 +3,8 @@ package de.sldk.mc.server;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
+import de.sldk.mc.logging.Logger;
+import de.sldk.mc.logging.LoggerFactory;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.Statistic;
@@ -15,11 +17,12 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 
 public class MinecraftApi {
 
     private static final long[] TICK_DURATIONS_PLACEHOLDER = new long[] { -1 };
+
+    private final Logger logger = LoggerFactory.getLogger();
 
     private final Plugin plugin;
 
@@ -84,7 +87,7 @@ public class MinecraftApi {
     public Optional<List<Long>> getTickDurations() {
         if (tickDurationReference == null) {
             tickDurationReference = tryToRetrieveTickDurationsReference().orElseGet(() -> {
-                plugin.getLogger().log(Level.WARNING, "Failed to find tick times buffer via reflection. Tick duration metrics will not be available.");
+                logger.warn("Failed to find tick times buffer via reflection. Tick duration metrics will not be available.");
                 return TICK_DURATIONS_PLACEHOLDER;
             });
         }
@@ -118,7 +121,7 @@ public class MinecraftApi {
                 }
             }
         } catch (Exception e) {
-            plugin.getLogger().log(Level.FINE, "Caught exception looking for tick times array: ", e);
+            logger.warn("Caught exception looking for tick times array: ", e);
         }
         return ofNullable(longestArray);
     }

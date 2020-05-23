@@ -120,7 +120,6 @@ class MinecraftApiTest {
         minecraftServer.longestArray[6] = 11;
         when(server.getServer()).thenReturn(minecraftServer);
         when(plugin.getServer()).thenReturn(server);
-        when(plugin.getLogger()).thenReturn(logger);
         MinecraftApi adapter = new MinecraftApi(plugin);
         assertThat(adapter.getTickDurations())
                 .isPresent()
