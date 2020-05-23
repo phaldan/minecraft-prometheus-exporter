@@ -1,16 +1,18 @@
 package de.sldk.mc.metrics;
 
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+
+import de.sldk.mc.server.MinecraftApi;
+import de.sldk.mc.server.MinecraftEntity;
+import de.sldk.mc.server.MinecraftEntityType;
+import de.sldk.mc.server.MinecraftWorld;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.Collections.singletonMap;
 
 /**
  * Get current count of all entities.
@@ -18,9 +20,9 @@ import static java.util.Collections.singletonMap;
  * Entities are labelled by
  * <ol>
  *     <li> world,
- *     <li> type ({@link EntityType}),
- *     <li> alive ({@link EntityType#isAlive()}),
- *     <li> and spawnable ({@link EntityType#isSpawnable()})
+ *     <li> type ({@link MinecraftEntityType}),
+ *     <li> alive ({@link MinecraftEntityType#isAlive()}),
+ *     <li> and spawnable ({@link MinecraftEntityType#isSpawnable()})
  * </ol>
  */
 public class Entities extends WorldMetric {
@@ -32,31 +34,32 @@ public class Entities extends WorldMetric {
             .create();
 
     /**
-     * Override the value returned by {@link EntityType#isAlive()}.
+     * Override the value returned by {@link MinecraftEntityType#isAlive()}.
      */
-    private static final Map<EntityType, Boolean> ALIVE_OVERRIDE = singletonMap(EntityType.ARMOR_STAND, false);
+    private static final Map<String, Boolean> ALIVE_OVERRIDE = singletonMap("armor_stand", false);
 
-    public Entities(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, ENTITIES, registry);
+    public Entities(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, ENTITIES, registry, server);
+        ENTITIES.clear();
     }
 
     @Override
-    public void collect(World world) {
-        Map<EntityType, Long> mapEntityTypesToCounts = world.getEntities().stream()
-                .collect(Collectors.groupingBy(Entity::getType, Collectors.counting()));
+    public void collect(MinecraftWorld world) {
+        Map<MinecraftEntityType, Long> mapEntityTypesToCounts = world.getEntities().stream()
+                .collect(groupingBy(MinecraftEntity::getType, counting()));
 
         mapEntityTypesToCounts
                 .forEach((entityType, count) ->
                         ENTITIES
                                 .labels(world.getName(),
-                                        getEntityName(entityType),
+                                        entityType.getName(),
                                         Boolean.toString(isEntityTypeAlive(entityType)),
                                         Boolean.toString(entityType.isSpawnable()))
                                 .set(count)
                 );
     }
 
-    private boolean isEntityTypeAlive(EntityType type) {
-        return ALIVE_OVERRIDE.containsKey(type) ? ALIVE_OVERRIDE.get(type) : type.isAlive();
+    private boolean isEntityTypeAlive(MinecraftEntityType type) {
+        return ALIVE_OVERRIDE.getOrDefault(type.getName(), type.isAlive());
     }
 }

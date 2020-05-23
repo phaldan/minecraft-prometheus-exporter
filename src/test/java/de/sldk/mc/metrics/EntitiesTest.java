@@ -1,16 +1,22 @@
 package de.sldk.mc.metrics;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static de.sldk.mc.metrics.CollectorRegistryAssertion.assertThat;
+import static de.sldk.mc.metrics.CollectorRegistryAssertion.sample;
+import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import de.sldk.mc.server.MinecraftEntity;
+import de.sldk.mc.server.MinecraftEntityType;
+import de.sldk.mc.server.MinecraftWorld;
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.Plugin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,98 +24,97 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+@ExtendWith(MockitoExtension.class)
 class EntitiesTest {
 
-	private static final String ENTITY_METRIC_NAME = "mc_entities_total";
-	private static final String[] METRIC_LABELS = new String[] {"world", "type", "alive", "spawnable"};
+	private static final String METRIC_NAME = "mc_entities_total";
+
+	private static final List<String> METRIC_LABELS = asList("world", "type", "alive", "spawnable");
+
+	private static final String WORLD_NAME = "world_name";
 
 	private Entities entitiesMetric;
+
 	private CollectorRegistry registry;
 
+	@Mock
+	private MinecraftWorld world;
+
 	@BeforeEach
-	void beforeEachTest() {
+	void beforeEachTest(@Mock Plugin plugin) {
 		registry = new CollectorRegistry();
-		entitiesMetric = new Entities(mock(Plugin.class), registry);
+		entitiesMetric = new Entities(plugin, registry, mock(MinecraftApi.class));
 		entitiesMetric.enable();
 	}
 
 	@Test
 	void givenTypedEntitiesExpectCorrectCount() {
-		final String worldName = "world_name";
-		final long numOfPigs = 1;
-		final long numOfHorses = 6;
-		final long numOfOrbs = 800;
-		final long numOfChicken = 9000;
-		final long numOfMinecarts = 10000;
-		List<Entity> mockedEntities = new ArrayList<>();
-		mockedEntities.addAll(mockEntities(numOfPigs, EntityType.PIG));
-		mockedEntities.addAll(mockEntities(numOfHorses, EntityType.HORSE));
-		mockedEntities.addAll(mockEntities(numOfOrbs, EntityType.EXPERIENCE_ORB));
-		mockedEntities.addAll(mockEntities(numOfChicken, EntityType.CHICKEN));
-		mockedEntities.addAll(mockEntities(numOfMinecarts, EntityType.MINECART));
+		final long numOfPigs = 2;
+		final long numOfHorses = 3;
+		final long numOfOrbs = 5;
+		final long numOfChicken = 7;
+		final long numOfMinecarts = 11;
+		List<MinecraftEntity> mockedEntities = new ArrayList<>();
+		mockedEntities.addAll(mockEntities(numOfPigs, "pig", true, true));
+		mockedEntities.addAll(mockEntities(numOfHorses, "horse", true, true));
+		mockedEntities.addAll(mockEntities(numOfOrbs, "experience_orb", false, true));
+		mockedEntities.addAll(mockEntities(numOfChicken, "chicken", true, true));
+		mockedEntities.addAll(mockEntities(numOfMinecarts, "minecart", false, true));
 		Collections.shuffle(mockedEntities);
 
-		World world = mock(World.class);
-		when(world.getName()).thenReturn(worldName);
+		when(world.getName()).thenReturn(WORLD_NAME);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
 		entitiesMetric.collect(world);
 
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "pig", "true", "true"})).isEqualTo(numOfPigs);
-
-
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "horse", "true", "true"})).isEqualTo(numOfHorses);
-
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "experience_orb", "false", "true"})).isEqualTo(numOfOrbs);
-
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "chicken", "true", "true"})).isEqualTo(numOfChicken);
-
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "minecart", "false", "true"})).isEqualTo(numOfMinecarts);
+		assertThat(registry).hasOnly(
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "pig", "true", "true"), numOfPigs),
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "horse", "true", "true"), numOfHorses),
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "experience_orb", "false", "true"), numOfOrbs),
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "chicken", "true", "true"), numOfChicken),
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "minecart", "false", "true"), numOfMinecarts));
 	}
 
 	@Test
 	void expectArmorStandAliveToBeFalse() {
 		final String worldName = "world_name";
 		final long numOfArmorStands = 11;
-		List<Entity> mockedEntities = new ArrayList<>(mockEntities(numOfArmorStands, EntityType.ARMOR_STAND));
+		List<MinecraftEntity> mockedEntities = new ArrayList<>(mockEntities(numOfArmorStands, "armor_stand", true, true));
 
-		World world = mock(World.class);
 		when(world.getName()).thenReturn(worldName);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
 		entitiesMetric.collect(world);
 
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "armor_stand", "false", "true"})).isEqualTo(numOfArmorStands);
+		assertThat(registry).hasOnly(
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "armor_stand", "false", "true"), numOfArmorStands));
 	}
 
 	@Test
 	void givenUnknownTypeExpectNoError() {
 		final String worldName = "world_name";
 		final long numOfUnknowns = 33;
-		List<Entity> mockedEntities = new ArrayList<>(mockEntities(numOfUnknowns, EntityType.UNKNOWN));
+		List<MinecraftEntity> mockedEntities = new ArrayList<>(mockEntities(numOfUnknowns, "UNKNOWN", false, false));
 
-		World world = mock(World.class);
 		when(world.getName()).thenReturn(worldName);
 		when(world.getEntities()).thenReturn(mockedEntities);
 
 		entitiesMetric.collect(world);
 
-		assertThat(registry.getSampleValue(ENTITY_METRIC_NAME, METRIC_LABELS,
-				new String[] {worldName, "UNKNOWN", "false", "false"})).isEqualTo(numOfUnknowns);
+		assertThat(registry).hasOnly(
+				sample(METRIC_NAME, METRIC_LABELS, asList(WORLD_NAME, "UNKNOWN", "false", "false"), numOfUnknowns));
 	}
 
-	private List<Entity> mockEntities(long count, EntityType type) {
-		return LongStream.range(0, count).mapToObj(i -> mockEntity(type)).collect(Collectors.toList());
+	private List<MinecraftEntity> mockEntities(long count, String type, boolean alive, boolean spawnable) {
+		MinecraftEntityType t = mock(MinecraftEntityType.class);
+		when(t.getName()).thenReturn(type);
+		when(t.isAlive()).thenReturn(alive);
+		when(t.isSpawnable()).thenReturn(spawnable);
+		return LongStream.range(0, count).mapToObj(i -> mockEntity(t)).collect(Collectors.toList());
 	}
 
-	private Entity mockEntity(EntityType type) {
-		Entity e = mock(Entity.class);
+	private MinecraftEntity mockEntity(MinecraftEntityType type) {
+		MinecraftEntity e = mock(MinecraftEntity.class);
 		when(e.getType()).thenReturn(type);
 		return e;
 	}

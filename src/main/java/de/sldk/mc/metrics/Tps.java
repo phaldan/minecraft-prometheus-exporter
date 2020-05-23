@@ -1,9 +1,9 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftApi;
 import de.sldk.mc.tps.TpsCollector;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class Tps extends Metric {
@@ -13,30 +13,27 @@ public class Tps extends Metric {
             .help("Server TPS (ticks per second)")
             .create();
 
-    private int taskId;
-
     private final TpsCollector tpsCollector = new TpsCollector();
 
-    public Tps(Plugin plugin, CollectorRegistry registry) {
+    private final MinecraftApi server;
+
+    private int taskId;
+
+    public Tps(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
         super(plugin, TPS, registry);
+        this.server = server;
     }
 
     @Override
     public void enable() {
         super.enable();
-        this.taskId = startTask(getPlugin());
+        this.taskId = server.scheduleSyncRepeatingTask(tpsCollector, 0, TpsCollector.POLL_INTERVAL);
     }
 
     @Override
     public void disable() {
         super.disable();
-        Bukkit.getScheduler().cancelTask(taskId);
-    }
-
-    private int startTask(Plugin plugin) {
-        return Bukkit.getServer()
-                .getScheduler()
-                .scheduleSyncRepeatingTask(plugin, tpsCollector, 0, TpsCollector.POLL_INTERVAL);
+        server.cancelScheduledTask(taskId);
     }
 
     @Override

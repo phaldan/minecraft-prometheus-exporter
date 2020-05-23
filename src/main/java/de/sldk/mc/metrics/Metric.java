@@ -22,10 +22,6 @@ public abstract class Metric {
         this.registry = registry;
     }
 
-    protected Plugin getPlugin() {
-        return plugin;
-    }
-
     public void collect() {
 
         if (!enabled) {
@@ -62,9 +58,5 @@ public abstract class Metric {
     public void disable() {
         registry.unregister(collector);
         enabled = false;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
     }
 }

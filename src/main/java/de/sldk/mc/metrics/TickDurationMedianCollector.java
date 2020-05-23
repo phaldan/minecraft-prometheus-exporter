@@ -1,33 +1,40 @@
 package de.sldk.mc.metrics;
 
-import java.util.Arrays;
-
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
 import org.bukkit.plugin.Plugin;
 
-import io.prometheus.client.Gauge;
+import java.util.Collections;
+import java.util.List;
 
-public class TickDurationMedianCollector extends TickDurationCollector {
-    private static final String NAME = "tick_duration_median";
+public class TickDurationMedianCollector extends Metric {
 
     private static final Gauge TD = Gauge.build()
-            .name(prefix(NAME))
+            .name(prefix("tick_duration_median"))
             .help("Median duration of server tick (nanoseconds)")
             .create();
 
-    public TickDurationMedianCollector(Plugin plugin, CollectorRegistry registry) {
+    private final MinecraftApi server;
+
+    public TickDurationMedianCollector(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
         super(plugin, TD, registry);
+        this.server = server;
     }
 
-    private long getTickDurationMedian() {
+    private double median(List<Long> times) {
         /* Copy the original array - don't want to sort it! */
-        long[] tickTimes = getTickDurations().clone();
-        Arrays.sort(tickTimes);
-        return tickTimes[tickTimes.length / 2];
+        Collections.sort(times);
+        int middle = times.size() / 2;
+        return times.size() % 2 == 1 ? times.get(middle) : (times.get(middle - 1) + times.get(middle)) / 2.0;
     }
 
     @Override
     public void doCollect() {
-        TD.set(getTickDurationMedian());
+        double value = server.getTickDurations()
+                .filter(list -> !list.isEmpty())
+                .map(this::median)
+                .orElse(-1.0);
+        TD.set(value);
     }
 }

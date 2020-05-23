@@ -1,35 +1,33 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
 import org.bukkit.plugin.Plugin;
 
-import io.prometheus.client.Gauge;
+import java.util.Collections;
 
-public class TickDurationMaxCollector extends TickDurationCollector {
-    private static final String NAME = "tick_duration_max";
+public class TickDurationMaxCollector extends Metric {
 
     private static final Gauge TD = Gauge.build()
-            .name(prefix(NAME))
+            .name(prefix("tick_duration_max"))
             .help("Max duration of server tick (nanoseconds)")
             .create();
 
-    public TickDurationMaxCollector(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, TD, registry);
-    }
+    private final MinecraftApi server;
 
-    private long getTickDurationMax() {
-        long max = Long.MIN_VALUE;
-        for (Long val : getTickDurations()) {
-            if (val > max) {
-                max = val;
-            }
-        }
-        return max;
+    public TickDurationMaxCollector(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, TD, registry);
+        this.server = server;
     }
 
     @Override
     public void doCollect() {
-        TD.set(getTickDurationMax());
+        double value = server.getTickDurations()
+                .filter(list -> !list.isEmpty())
+                .map(Collections::max)
+                .orElse(-1L);
+        TD.set(value);
     }
 }
 

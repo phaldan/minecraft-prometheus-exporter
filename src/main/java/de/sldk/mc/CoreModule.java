@@ -1,5 +1,6 @@
 package de.sldk.mc;
 
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.Plugin;
 
@@ -17,4 +18,7 @@ public class CoreModule {
         return new MetricRegistry();
     }
 
+    MinecraftApi minecraftPluginAdapter(Plugin plugin) {
+        return new MinecraftApi(plugin);
+    }
 }

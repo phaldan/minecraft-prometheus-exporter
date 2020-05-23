@@ -1,33 +1,26 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftWorld;
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.Plugin;
 
 public abstract class WorldMetric extends Metric {
 
-    public WorldMetric(Plugin plugin, Collector collector, CollectorRegistry registry) {
+    private final MinecraftApi server;
+
+    public WorldMetric(Plugin plugin, Collector collector, CollectorRegistry registry, MinecraftApi server) {
         super(plugin, collector, registry);
+        this.server = server;
     }
 
     @Override
     public final void doCollect() {
-        for (World world : Bukkit.getWorlds()) {
+        for (MinecraftWorld world : server.getWorlds()) {
             collect(world);
         }
     }
 
-    protected abstract void collect(World world);
-
-    protected String getEntityName(EntityType type) {
-        try {
-            return type.getKey().getKey();
-        } catch (Throwable t) {
-            // Note: The entity type key above was introduced in 1.14. Older implementations should fallback here.
-            return type.name();
-        }
-    }
+    protected abstract void collect(MinecraftWorld world);
 }

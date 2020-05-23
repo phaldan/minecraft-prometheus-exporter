@@ -1,35 +1,33 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Gauge;
 import org.bukkit.plugin.Plugin;
 
-import io.prometheus.client.Gauge;
+import java.util.Collections;
 
-public class TickDurationMinCollector extends TickDurationCollector {
-    private static final String NAME = "tick_duration_min";
+public class TickDurationMinCollector extends Metric {
 
     private static final Gauge TD = Gauge.build()
-            .name(prefix(NAME))
+            .name(prefix("tick_duration_min"))
             .help("Min duration of server tick (nanoseconds)")
             .create();
 
-    public TickDurationMinCollector(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, TD, registry);
-    }
+    private final MinecraftApi server;
 
-    private long getTickDurationMin() {
-        long min = Long.MAX_VALUE;
-        for (Long val : getTickDurations()) {
-            if (val < min) {
-                min = val;
-            }
-        }
-        return min;
+    public TickDurationMinCollector(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, TD, registry);
+        this.server = server;
     }
 
     @Override
     public void doCollect() {
-        TD.set(getTickDurationMin());
+        double value = server.getTickDurations()
+                .filter(list -> !list.isEmpty())
+                .map(Collections::min)
+                .orElse(-1L);
+        TD.set(value);
     }
 }
 

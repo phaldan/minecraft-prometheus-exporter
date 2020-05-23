@@ -1,19 +1,19 @@
 package de.sldk.mc.metrics;
 
+import static java.util.stream.Collectors.toMap;
+
+import de.sldk.mc.server.MinecraftApi;
+import de.sldk.mc.server.MinecraftEntityType;
+import de.sldk.mc.server.MinecraftPlayer;
+import de.sldk.mc.server.MinecraftPlayerStatistic;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Statistic;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 public class PlayerStatistics extends PlayerMetric {
 
@@ -23,63 +23,45 @@ public class PlayerStatistics extends PlayerMetric {
             .labelNames("player_name", "player_uid", "statistic")
             .create();
 
-    public PlayerStatistics(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, PLAYER_STATS, registry);
+    private final List<MinecraftPlayerStatistic> statistic;
+    private final List<MinecraftEntityType> entityTypes;
+    private final List<String> materials;
+
+    public PlayerStatistics(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, PLAYER_STATS, registry, server);
+        statistic = server.getStatistics();
+        entityTypes = server.getEntityTypes();
+        materials = server.getMaterials();
     }
 
     @Override
-    public void collect(OfflinePlayer player) {
-
-        Map<String, Integer> statistics = getStatistics(player.getPlayer());
-        final String playerNameLabel = getNameOrUid(player);
-        final String playerUidLabel = getUid(player);
-
-        statistics.forEach((stat, value) -> PLAYER_STATS.labels(playerNameLabel, playerUidLabel, stat).set(value));
+    public void collect(MinecraftPlayer player) {
+        getStatistics(player).forEach((stat, value) -> PLAYER_STATS.labels(player.getName(), player.getUniqueId(), stat).set(value));
     }
 
-    private static Map<String, Integer> getStatistics(Player player) {
-
-        if (player == null) {
-            return Collections.emptyMap();
-        }
-
-        EntityType[] entityTypes = EntityType.values();
-        Material[] materials = Material.values();
-
-        Statistic[] statistics = Statistic.values();
-
-        return Arrays.stream(statistics).collect(Collectors.toMap(Enum::name, statistic -> {
-
-            if (Statistic.Type.UNTYPED == statistic.getType()) {
-                return player.getStatistic(statistic);
-            } else if (Statistic.Type.ENTITY == statistic.getType()) {
-                return Arrays.stream(entityTypes).map(type -> getSafeStatistic(player, statistic, type))
-                        .filter(Objects::nonNull)
-                        .reduce(0,  Integer::sum);
-            } else if (Statistic.Type.ITEM == statistic.getType()
-                    || Statistic.Type.BLOCK == statistic.getType()) {
-                return Arrays.stream(materials).map(material -> getSafeStatistic(player, statistic, material))
-                        .filter(Objects::nonNull)
-                        .reduce(0,  Integer::sum);
-            }
-
-            return 0;
-        }));
+    private Map<String, Integer> getStatistics(MinecraftPlayer player) {
+        return Optional.of(player)
+                .map(this::getPlayerStatistic)
+                .orElseGet(Collections::emptyMap);
     }
 
-    private static Integer getSafeStatistic(Player player, Statistic statistic, Material material) {
-        try {
-            return player.getStatistic(statistic, material);
-        } catch (Exception e) {
-            return null;
-        }
+    private Map<String, Integer> getPlayerStatistic(MinecraftPlayer player) {
+        return statistic.stream()
+                .collect(toMap(MinecraftPlayerStatistic::getName, s -> getStatistic(player, s)));
     }
 
-    private static Integer getSafeStatistic(Player player, Statistic statistic, EntityType type) {
-        try {
-            return player.getStatistic(statistic, type);
-        } catch (Exception e) {
-            return null;
+    private Integer getStatistic(MinecraftPlayer player, MinecraftPlayerStatistic statistic) {
+        if (statistic.isUntyped()) {
+            return player.getStatistic(statistic);
+        } else if (statistic.isEntity()) {
+            return entityTypes.stream()
+                    .map(type -> player.getStatistic(statistic, type))
+                    .reduce(0,  Integer::sum);
+        } else if (statistic.isMaterial()) {
+            return materials.stream()
+                    .map(material -> player.getStatistic(statistic, material))
+                    .reduce(0,  Integer::sum);
         }
+        return 0;
     }
 }

@@ -1,12 +1,11 @@
 package de.sldk.mc.metrics;
 
-import java.util.List;
-
+import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.hotspot.ThreadExports;
 import org.bukkit.plugin.Plugin;
 
-import io.prometheus.client.Collector;
-import io.prometheus.client.hotspot.ThreadExports;
+import java.util.List;
 
 public class ThreadsWrapper extends Metric {
     public ThreadsWrapper(Plugin plugin, CollectorRegistry registry) {

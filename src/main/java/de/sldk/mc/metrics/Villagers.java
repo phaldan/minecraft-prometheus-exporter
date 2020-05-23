@@ -1,24 +1,27 @@
 package de.sldk.mc.metrics;
 
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+
+import de.sldk.mc.server.MinecraftWorld;
+import de.sldk.mc.server.MinecraftApi;
+import de.sldk.mc.server.MinecraftVillager;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.World;
-import org.bukkit.entity.Villager;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Get total count of Villagers.
  * <p>
  * Labelled by
  * <ul>
- *     <li> World ({@link World#getName()})
- *     <li> Type, e.g. 'desert', 'plains ({@link org.bukkit.entity.Villager.Type})
- *     <li> Profession, e.g. 'fisherman', 'farmer', or 'none' ({@link org.bukkit.entity.Villager.Profession})
- *     <li> Level ({@link Villager#getVillagerLevel()})
+ *     <li> World ({@link MinecraftWorld#getName()})
+ *     <li> Type, e.g. 'desert', 'plains ({@link MinecraftVillager#getVillagerType()})
+ *     <li> Profession, e.g. 'fisherman', 'farmer', or 'none' ({@link MinecraftVillager#getProfession()})
+ *     <li> Level ({@link MinecraftVillager#getVillagerLevel()})
  * </ul>
  */
 public class Villagers extends WorldMetric {
@@ -29,21 +32,20 @@ public class Villagers extends WorldMetric {
             .labelNames("world", "type", "profession", "level")
             .create();
 
-    public Villagers(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, VILLAGERS, registry);
+    public Villagers(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, VILLAGERS, registry, server);
     }
 
     @Override
-    public void collect(World world) {
-        Map<VillagerGrouping, Long> mapVillagerGroupingToCount = world
-                .getEntitiesByClass(Villager.class).stream()
-                .collect(Collectors.groupingBy(VillagerGrouping::new, Collectors.counting()));
+    public void collect(MinecraftWorld world) {
+        Map<VillagerGrouping, Long> mapVillagerGroupingToCount = world.getVillager().stream()
+                .collect(groupingBy(VillagerGrouping::new, counting()));
 
         mapVillagerGroupingToCount.forEach((grouping, count) ->
                 VILLAGERS
                         .labels(world.getName(),
-                                grouping.type.getKey().getKey(),
-                                grouping.profession.getKey().getKey(),
+                                grouping.type,
+                                grouping.profession,
                                 Integer.toString(grouping.level))
                         .set(count)
         );
@@ -53,11 +55,11 @@ public class Villagers extends WorldMetric {
      * Class used to group villagers together before summation.
      */
     private static class VillagerGrouping {
-        private final Villager.Type type;
-        private final Villager.Profession profession;
+        private final String type;
+        private final String profession;
         private final int level;
 
-        VillagerGrouping(Villager villager) {
+        VillagerGrouping(MinecraftVillager villager) {
             this.type = villager.getVillagerType();
             this.profession = villager.getProfession();
             this.level = villager.getVillagerLevel();
@@ -69,8 +71,8 @@ public class Villagers extends WorldMetric {
             if (o == null || getClass() != o.getClass()) return false;
             VillagerGrouping that = (VillagerGrouping) o;
             return level == that.level &&
-                    type == that.type &&
-                    profession == that.profession;
+                    type.equals(that.type) &&
+                    profession.equals(that.profession);
         }
 
         @Override

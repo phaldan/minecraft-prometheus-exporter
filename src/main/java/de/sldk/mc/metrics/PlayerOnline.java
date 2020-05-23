@@ -1,8 +1,9 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftPlayer;
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 
 public class PlayerOnline extends PlayerMetric {
@@ -13,12 +14,12 @@ public class PlayerOnline extends PlayerMetric {
             .labelNames("name", "uid")
             .create();
 
-    public PlayerOnline(Plugin plugin, CollectorRegistry registry) {
-        super(plugin, PLAYERS_WITH_NAMES, registry);
+    public PlayerOnline(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
+        super(plugin, PLAYERS_WITH_NAMES, registry, server);
     }
 
     @Override
-    public void collect(OfflinePlayer player) {
-        PLAYERS_WITH_NAMES.labels(getNameOrUid(player), getUid(player)).set(player.isOnline() ? 1 : 0);
+    public void collect(MinecraftPlayer player) {
+        PLAYERS_WITH_NAMES.labels(player.getName(), player.getUniqueId()).set(player.isOnline() ? 1 : 0);
     }
 }

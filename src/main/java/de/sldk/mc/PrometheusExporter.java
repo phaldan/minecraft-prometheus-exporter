@@ -2,6 +2,7 @@ package de.sldk.mc;
 
 import de.sldk.mc.config.PrometheusExporterConfig;
 import de.sldk.mc.metrics.Metric;
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.eclipse.jetty.server.Server;
@@ -23,7 +24,9 @@ public class PrometheusExporter extends JavaPlugin {
 
     private final MetricsController controller = coreModule.metricsController(this, registry, metricRegistry);
 
-    private final Map<String, Metric> metrics = metricModule.metrics(this, registry);
+    private final MinecraftApi minecraftServer = coreModule.minecraftPluginAdapter(this);
+
+    private final Map<String, Metric> metrics = metricModule.metrics(this, registry, minecraftServer);
 
     private final PrometheusExporterConfig config = metricModule.prometheusExporterConfig(this, metrics, metricRegistry);
 

@@ -1,8 +1,8 @@
 package de.sldk.mc.metrics;
 
+import de.sldk.mc.server.MinecraftApi;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Gauge;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class PlayersTotal extends Metric {
@@ -12,12 +12,15 @@ public class PlayersTotal extends Metric {
             .help("Unique players (online + offline)")
             .create();
 
-    public PlayersTotal(Plugin plugin, CollectorRegistry registry) {
+    private final MinecraftApi server;
+
+    public PlayersTotal(Plugin plugin, CollectorRegistry registry, MinecraftApi server) {
         super(plugin, PLAYERS, registry);
+        this.server = server;
     }
 
     @Override
     public void doCollect() {
-        PLAYERS.set(Bukkit.getOfflinePlayers().length);
+        PLAYERS.set(server.countPlayers());
     }
 }
